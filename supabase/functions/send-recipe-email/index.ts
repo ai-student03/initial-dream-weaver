@@ -66,7 +66,6 @@ serve(async (req) => {
   }
 });
 
-/*
 function generateEmailHtml(recipe) {
   // Generate HTML email template with the recipe details
   return `
@@ -84,15 +83,20 @@ function generateEmailHtml(recipe) {
         h2 { color: #555; }
         ul { padding-left: 20px; }
         .footer { text-align: center; margin-top: 30px; font-size: 0.8em; color: #666; }
+        .motivational { background-color: #f9f9f9; border-left: 4px solid #f8a5c2; padding: 15px; margin: 20px 0; font-style: italic; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <h1>FiMe Recipe</h1>
+          <h1>Your FiMe Recipe</h1>
         </div>
         <div class="content">
           <h2>${recipe.recipeName}</h2>
+          
+          <div class="motivational">
+            <p>Great job choosing to nourish your body with this delicious, healthy meal! This recipe is perfectly aligned with your ${recipe.goals.join(', ')} goals.</p>
+          </div>
           
           <div class="nutrition">
             <div>
@@ -121,8 +125,13 @@ function generateEmailHtml(recipe) {
           <h3>Instructions</h3>
           <p>${recipe.instructions.replace(/\n/g, '<br>')}</p>
           
+          <div class="motivational">
+            <p>You've got this! Remember, every healthy meal is a step toward your goals. Enjoy this delicious recipe!</p>
+          </div>
+          
           <div class="footer">
             <p>Sent from FiMe - Your Smart Nutrition Assistant</p>
+            <p>Making healthy eating simple and delicious!</p>
           </div>
         </div>
       </div>
@@ -130,4 +139,3 @@ function generateEmailHtml(recipe) {
     </html>
   `;
 }
-*/

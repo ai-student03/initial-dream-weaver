@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -220,6 +219,16 @@ const RecipePreview: React.FC = () => {
           </div>
         </Card>
         
+        {/* Email prompt */}
+        <Card className="p-6 bg-primary/10 border-primary/30">
+          <div className="text-center">
+            <h3 className="font-medium mb-2">Would you like me to send this recipe to your email?</h3>
+            <Button onClick={handleOpenEmailDialog} className="mt-2">
+              Yes, send to email
+            </Button>
+          </div>
+        </Card>
+        
         <div className="flex gap-4">
           <Button 
             onClick={handleSaveRecipe} 
@@ -230,21 +239,13 @@ const RecipePreview: React.FC = () => {
             {savingRecipe ? 'Saving...' : 'Save Recipe'}
           </Button>
           <Button 
-            onClick={handleOpenEmailDialog}
+            onClick={() => navigate('/')}
+            variant="outline" 
             className="flex-1"
-            disabled={sendingEmail}
           >
-            Email Recipe
+            Create Another Recipe
           </Button>
         </div>
-        
-        <Button 
-          onClick={() => navigate('/')}
-          variant="outline" 
-          className="w-full"
-        >
-          Create Another Recipe
-        </Button>
 
         <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
           <DialogContent>
