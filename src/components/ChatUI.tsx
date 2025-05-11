@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -54,7 +53,7 @@ export const ChatUI: React.FC = () => {
   const handleUserInput = () => {
     if (!userInput.trim()) return;
 
-    const updatedMessages = [...chatState.messages, { role: 'user', content: userInput }];
+    const updatedMessages = [...chatState.messages, { role: 'user' as const, content: userInput }];
     
     // Add user's message and process based on current step
     if (chatState.step === 'ingredients') {
@@ -65,7 +64,7 @@ export const ChatUI: React.FC = () => {
         messages: [
           ...updatedMessages,
           {
-            role: 'assistant',
+            role: 'assistant' as const,
             content: "What are your goals for this meal?"
           }
         ],
@@ -88,9 +87,9 @@ export const ChatUI: React.FC = () => {
       step: 'cookingTime',
       messages: [
         ...chatState.messages,
-        { role: 'user', content: goals.join(', ') },
+        { role: 'user' as const, content: goals.join(', ') },
         {
-          role: 'assistant',
+          role: 'assistant' as const,
           content: `How many minutes do you have to cook?`
         }
       ],
@@ -104,8 +103,8 @@ export const ChatUI: React.FC = () => {
       step: 'generating',
       messages: [
         ...chatState.messages,
-        { role: 'user', content: `${time} minutes` },
-        { role: 'assistant', content: "Thinking of something delicious just for you... 🍳" }
+        { role: 'user' as const, content: `${time} minutes` },
+        { role: 'assistant' as const, content: "Thinking of something delicious just for you... 🍳" }
       ],
       cookingTime: time
     });
@@ -243,7 +242,7 @@ export const ChatUI: React.FC = () => {
         messages: [
           ...chatState.messages,
           { 
-            role: 'assistant', 
+            role: 'assistant' as const, 
             content: "What ingredients do you currently have at home?" 
           }
         ]

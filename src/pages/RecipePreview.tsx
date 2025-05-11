@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Recipe, RecipeFormData } from '@/lib/types';
 import { toast } from 'sonner';
-import { Loader, Mail, Utensils } from 'lucide-react';
+import { Loader, Mail, Utensils, Check } from 'lucide-react';
 
 const RecipePreview = () => {
   const location = useLocation();
