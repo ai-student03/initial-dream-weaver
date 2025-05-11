@@ -70,6 +70,11 @@ export default {
 					amber: '#f59e0b',
 					red: '#ef4444',
 					gray: '#6b7280'
+				},
+				fime: {
+					peach: '#FFDAB9',
+					pink: '#F8BBD0',
+					coral: '#FF6F61'
 				}
 			},
 			borderRadius: {
@@ -97,18 +102,24 @@ export default {
 				'pulse-subtle': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.8' }
+				},
+				'bubble-in': {
+					'0%': { transform: 'scale(0.8)', opacity: '0' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite'
+				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
+				'bubble-in': 'bubble-in 0.3s ease-out forwards'
 			},
 			fontFamily: {
-				sans: ['Inter', 'sans-serif']
+				sans: ['Poppins', 'Inter', 'sans-serif']
 			},
 			backgroundImage: {
-				'gradient-soft': 'linear-gradient(to bottom right, #f8fafc, #f1f5f9)'
+				'gradient-soft': 'linear-gradient(to bottom right, #f8fafc, #f1f5f9)',
+				'gradient-fime': 'linear-gradient(to right, #FFDAB9, #F8BBD0)'
 			}
 		}
 	},

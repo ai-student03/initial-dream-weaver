@@ -42,7 +42,7 @@ serve(async (req) => {
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
     
     const { data, error } = await resend.emails.send({
-      from: 'FiMe <recipes@yourdomain.com>',
+      from: "FiMe <recipes@yourdomain.com>",
       to: [email],
       subject: `Your Recipe: ${recipe.recipeName}`,
       html: generateEmailHtml(recipe),
@@ -73,29 +73,127 @@ function generateEmailHtml(recipe) {
     <html>
     <head>
       <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .header { background-color: #f8a5c2; padding: 20px; text-align: center; color: white; }
-        .content { padding: 20px; }
-        .nutrition { display: flex; background-color: #f3f4f6; padding: 10px; margin-bottom: 20px; }
-        .nutrition div { flex: 1; text-align: center; }
-        h1 { color: #333; }
-        h2 { color: #555; }
-        ul { padding-left: 20px; }
-        .footer { text-align: center; margin-top: 30px; font-size: 0.8em; color: #666; }
-        .motivational { background-color: #f9f9f9; border-left: 4px solid #f8a5c2; padding: 15px; margin: 20px 0; font-style: italic; }
+        body { 
+          font-family: 'Poppins', 'Nunito', sans-serif;
+          line-height: 1.6; 
+          color: #333;
+          background-color: #fcfcfc;
+          margin: 0;
+          padding: 0;
+        }
+        .container { 
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: #ffffff;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .header { 
+          background: linear-gradient(to right, #FFDAB9, #F8BBD0);
+          padding: 30px 20px;
+          text-align: center;
+          color: #333;
+        }
+        .content { 
+          padding: 30px;
+        }
+        .nutrition { 
+          display: flex;
+          background-color: rgba(255,218,185,0.2);
+          padding: 15px;
+          margin-bottom: 25px;
+          border-radius: 10px;
+        }
+        .nutrition div { 
+          flex: 1;
+          text-align: center;
+        }
+        h1 {
+          color: #FF6F61;
+          margin: 0;
+          font-size: 28px;
+          font-weight: 700;
+        }
+        h2 { 
+          color: #FF6F61;
+          margin-top: 0;
+          font-size: 24px;
+        }
+        h3 {
+          color: #FF6F61;
+          font-size: 18px;
+          margin-bottom: 10px;
+        }
+        ul { 
+          padding-left: 20px;
+          margin-bottom: 25px;
+        }
+        li {
+          margin-bottom: 8px;
+        }
+        .footer { 
+          text-align: center;
+          padding: 20px;
+          background-color: rgba(255,218,185,0.1);
+          font-size: 0.9em;
+          color: #666;
+          border-top: 1px solid rgba(248,187,208,0.3);
+        }
+        .motivational { 
+          background-color: rgba(248,187,208,0.15);
+          border-left: 4px solid #FF6F61;
+          padding: 15px;
+          margin: 25px 0;
+          border-radius: 0 8px 8px 0;
+        }
+        .goals {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 20px;
+        }
+        .goal-tag {
+          background-color: rgba(248,187,208,0.3);
+          padding: 5px 12px;
+          border-radius: 20px;
+          font-size: 0.9em;
+          font-weight: 500;
+        }
+        .logo {
+          font-weight: 800;
+          font-size: 32px;
+          color: #FF6F61;
+          margin-bottom: 5px;
+        }
+        .logo-tagline {
+          font-size: 14px;
+          color: #666;
+        }
+        .instructions {
+          background-color: #fff;
+          padding: 15px;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          margin-bottom: 25px;
+        }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <h1>Your FiMe Recipe</h1>
+          <div class="logo">FiMe</div>
+          <div class="logo-tagline">Your Smart Nutrition Assistant</div>
         </div>
         <div class="content">
           <h2>${recipe.recipeName}</h2>
           
           <div class="motivational">
-            <p>Great job choosing to nourish your body with this delicious, healthy meal! This recipe is perfectly aligned with your ${recipe.goals.join(', ')} goals.</p>
+            <p>Amazing choice! This delicious meal is perfectly aligned with your ${recipe.goals.join(', ')} goals. Your body will thank you for the nourishment!</p>
+          </div>
+          
+          <div class="goals">
+            ${recipe.goals.map(goal => `<span class="goal-tag">${goal}</span>`).join('')}
           </div>
           
           <div class="nutrition">
@@ -117,22 +215,25 @@ function generateEmailHtml(recipe) {
             </div>
           </div>
           
+          <h3>Ready in ${recipe.cookingTime} minutes</h3>
+          
           <h3>Ingredients</h3>
           <ul>
             ${recipe.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}
           </ul>
           
           <h3>Instructions</h3>
-          <p>${recipe.instructions.replace(/\n/g, '<br>')}</p>
+          <div class="instructions">
+            ${recipe.instructions.replace(/\n/g, '<br><br>')}
+          </div>
           
           <div class="motivational">
-            <p>You've got this! Remember, every healthy meal is a step toward your goals. Enjoy this delicious recipe!</p>
+            <p>Enjoy this healthy meal! Remember, taking care of your body with nutritious food is a powerful act of self-love. You've got this! 💪</p>
           </div>
-          
-          <div class="footer">
-            <p>Sent from FiMe - Your Smart Nutrition Assistant</p>
-            <p>Making healthy eating simple and delicious!</p>
-          </div>
+        </div>
+        <div class="footer">
+          <p>Sent from FiMe - Your Smart Nutrition Assistant</p>
+          <p>Making healthy eating simple and delicious!</p>
         </div>
       </div>
     </body>
