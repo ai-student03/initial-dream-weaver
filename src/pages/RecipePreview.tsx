@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -64,6 +63,15 @@ const RecipePreview: React.FC = () => {
     
     try {
       setSavingRecipe(true);
+      
+      // Get the user's ID from the session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please sign in to save recipes");
+        navigate("/auth");
+        return;
+      }
+      
       const { error } = await supabase.from('saved_recipes').insert({
         recipe_name: recipe.recipeName,
         ingredients: recipe.ingredients,
@@ -75,7 +83,8 @@ const RecipePreview: React.FC = () => {
         cooking_time: recipe.cookingTime,
         goals: recipe.goals,
         image_url: recipe.imageUrl,
-        is_favorited: recipe.isFavorited
+        is_favorited: recipe.isFavorited,
+        user_id: session.user.id // Add the user_id field
       });
       
       if (error) throw error;
