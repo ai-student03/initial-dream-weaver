@@ -81,7 +81,7 @@
 
 @layer components {
   .task-card {
-    @apply group relative flex flex-col rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md;
+    @apply relative flex flex-col rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md;
   }
   
   .priority-low {

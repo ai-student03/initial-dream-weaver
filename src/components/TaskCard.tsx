@@ -25,7 +25,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggleComplete, onDelete })
   return (
     <div
       className={cn(
-        'task-card',
+        'task-card group',
         `priority-${task.priority}`,
         task.completed && 'opacity-70'
       )}
