@@ -158,6 +158,33 @@ export type Database = {
         }
         Relationships: []
       }
+      nutrition_profiles: {
+        Row: {
+          created_at: string | null
+          dietary_restrictions: string[] | null
+          favorite_ingredients: string[] | null
+          id: string
+          preferred_goals: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dietary_restrictions?: string[] | null
+          favorite_ingredients?: string[] | null
+          id: string
+          preferred_goals?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dietary_restrictions?: string[] | null
+          favorite_ingredients?: string[] | null
+          id?: string
+          preferred_goals?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -182,6 +209,57 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      saved_recipes: {
+        Row: {
+          calories: number | null
+          carbs: number | null
+          cooking_time: number | null
+          created_at: string | null
+          fat: number | null
+          goals: string[] | null
+          id: string
+          image_url: string | null
+          ingredients: string[]
+          instructions: string
+          is_favorited: boolean | null
+          protein: number | null
+          recipe_name: string
+          user_id: string
+        }
+        Insert: {
+          calories?: number | null
+          carbs?: number | null
+          cooking_time?: number | null
+          created_at?: string | null
+          fat?: number | null
+          goals?: string[] | null
+          id?: string
+          image_url?: string | null
+          ingredients: string[]
+          instructions: string
+          is_favorited?: boolean | null
+          protein?: number | null
+          recipe_name: string
+          user_id: string
+        }
+        Update: {
+          calories?: number | null
+          carbs?: number | null
+          cooking_time?: number | null
+          created_at?: string | null
+          fat?: number | null
+          goals?: string[] | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[]
+          instructions?: string
+          is_favorited?: boolean | null
+          protein?: number | null
+          recipe_name?: string
+          user_id?: string
         }
         Relationships: []
       }

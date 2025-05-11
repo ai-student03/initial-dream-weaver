@@ -1,19 +1,40 @@
 
-export type Priority = 'low' | 'medium' | 'high';
+// Adding FiMe app types to the existing types
 
-export type Tag = {
-  id: string;
-  name: string;
-  color?: string;
+export type NutritionGoal = 
+  | 'Build muscle' 
+  | 'Lose fat' 
+  | 'Maintain weight' 
+  | 'Cycle-based nutrition' 
+  | 'Vegan' 
+  | 'Gluten-free' 
+  | 'Kosher';
+
+export type RecipeFormData = {
+  ingredients: string;
+  goals: NutritionGoal[];
+  cookingTime: number;
 };
 
-export type Task = {
+export type Recipe = {
+  id?: string;
+  recipeName: string;
+  ingredients: string[];
+  instructions: string;
+  protein: number;
+  carbs: number;
+  fat: number;
+  calories: number;
+  cookingTime: number;
+  goals: string[];
+  imageUrl?: string;
+  isFavorited: boolean;
+  createdAt?: Date;
+};
+
+export type NutritionProfile = {
   id: string;
-  title: string;
-  description?: string;
-  completed: boolean;
-  createdAt: Date;
-  dueDate?: Date;
-  priority: Priority;
-  tags: Tag[];
+  preferredGoals: string[];
+  dietaryRestrictions: string[];
+  favoriteIngredients: string[];
 };
