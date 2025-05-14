@@ -25,18 +25,23 @@ serve(async (req) => {
       );
     }
 
-    // Create a prompt for GPT
+    // Create a prompt for GPT with the updated format
     const prompt = `
-      Act as a professional nutritionist. Based on:
-      Ingredients: ${ingredients}
-      Goals: ${goals.join(', ')}
-      Time: ${cookingTime} minutes
-
-      Suggest one healthy and satisfying meal that matches the user's goal. Include:
-      - Dish name
-      - Ingredient list (with quantities)
-      - Preparation steps (numbered)
-      - Nutritional values: protein (g), carbs (g), fat (g), calories (total)
+      Act as a professional nutritionist and experienced home chef.  
+      Given these ingredients: ${ingredients},  
+      goal: ${goals.join(', ')},  
+      and cooking time: ${cookingTime} minutes –  
+      propose one realistic, balanced, and appealing meal that fits the goal.  
+      ⚠️ Do NOT use all ingredients if they do not naturally go well together.  
+      ✅ Only combine ingredients that make culinary and nutritional sense.  
+      ❌ Avoid unusual or unappetizing combinations.  
+      ✅ If the ingredients do not suffice for a tasty meal, suggest the closest viable option using only part of them or basic additions.
+      
+      Return:  
+      - Name of the dish  
+      - List of ingredients used  
+      - Preparation steps  
+      - Nutritional values (protein, carbs, fat, calories)
 
       Format your response as a JSON object with these fields: 
       {
