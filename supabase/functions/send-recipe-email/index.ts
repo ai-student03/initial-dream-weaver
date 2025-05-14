@@ -23,18 +23,13 @@ serve(async (req) => {
       );
     }
 
-    // For now, we'll simulate sending an email
-    // In a production environment, you would use a service like SendGrid, Resend, etc.
+    // Log email sending details for debugging
     console.log(`Sending recipe "${recipe.recipeName}" to ${email}`);
 
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    return new Response(
-      JSON.stringify({ success: true, message: 'Email sent successfully' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
+    // The real implementation would use an email service like Resend
     /* 
     // Example implementation with an email service like Resend
     // You would need to add the RESEND_API_KEY to your Supabase secrets
@@ -51,12 +46,12 @@ serve(async (req) => {
     if (error) {
       throw new Error(`Email service error: ${error.message}`);
     }
+    */
 
     return new Response(
       JSON.stringify({ success: true, message: 'Email sent successfully' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-    */
   } catch (error) {
     console.error('Error in send-recipe-email function:', error);
     return new Response(
@@ -177,6 +172,12 @@ function generateEmailHtml(recipe) {
           box-shadow: 0 1px 3px rgba(0,0,0,0.05);
           margin-bottom: 25px;
         }
+        .recipe-image {
+          max-width: 100%;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          display: block;
+        }
       </style>
     </head>
     <body>
@@ -187,6 +188,8 @@ function generateEmailHtml(recipe) {
         </div>
         <div class="content">
           <h2>${recipe.recipeName}</h2>
+          
+          ${recipe.imageUrl ? `<img src="${recipe.imageUrl}" alt="${recipe.recipeName}" class="recipe-image"/>` : ''}
           
           <div class="motivational">
             <p>Amazing choice! This delicious meal is perfectly aligned with your ${recipe.goals.join(', ')} goals. Your body will thank you for the nourishment!</p>
@@ -219,7 +222,9 @@ function generateEmailHtml(recipe) {
           
           <h3>Ingredients</h3>
           <ul>
-            ${recipe.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}
+            ${Array.isArray(recipe.ingredients) 
+              ? recipe.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')
+              : `<li>${recipe.ingredients}</li>`}
           </ul>
           
           <h3>Instructions</h3>
