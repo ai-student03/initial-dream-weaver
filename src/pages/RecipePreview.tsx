@@ -11,6 +11,7 @@ import RecipeIngredients from '@/components/recipe/RecipeIngredients';
 import RecipeInstructions from '@/components/recipe/RecipeInstructions';
 import RecipeEmailPrompt from '@/components/recipe/RecipeEmailPrompt';
 import RecipeLoadingState from '@/components/recipe/RecipeLoadingState';
+import RecipeImagePrompt from '@/components/recipe/RecipeImagePrompt';
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration';
 import { useRecipeEmail } from '@/hooks/useRecipeEmail';
 
@@ -76,6 +77,10 @@ const RecipePreview = () => {
           <RecipeGoals goals={recipe.goals} />
           <RecipeIngredients ingredients={recipe.ingredients} />
           <RecipeInstructions instructions={recipe.instructions} />
+          
+          {recipe.imagePrompt && (
+            <RecipeImagePrompt prompt={recipe.imagePrompt} />
+          )}
           
           <RecipeEmailPrompt 
             recipe={recipe} 

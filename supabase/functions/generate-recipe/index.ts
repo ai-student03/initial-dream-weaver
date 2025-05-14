@@ -25,34 +25,33 @@ serve(async (req) => {
       );
     }
 
-    // Create a prompt for GPT with the updated format
+    // Create a prompt for GPT with the updated format that requests a JSON response
     const prompt = `
-      Act as a professional nutritionist and experienced home chef.  
-      Given these ingredients: ${ingredients},  
-      goal: ${goals.join(', ')},  
-      and cooking time: ${cookingTime} minutes –  
-      propose one realistic, balanced, and appealing meal that fits the goal.  
+      Act as a professional nutritionist and food stylist.
+      
+      The user has the following ingredients: ${ingredients}  
+      Their goal is: ${goals.join(', ')}  
+      They have ${cookingTime} minutes to cook.
+      
+      Generate one realistic, tasty and healthy recipe that fits these inputs.  
+      Also, write a detailed and vivid prompt to generate an image of the dish using an AI image generator.
+      
+      Respond in this exact JSON format:
+      {
+        "recipe_name": "...",
+        "ingredients": [...], // array of strings
+        "instructions": "...",
+        "protein": number,
+        "carbs": number, 
+        "fat": number,
+        "calories": number,
+        "image_prompt": "a modern, healthy-looking dish with ..., top view, natural light, minimal styling"
+      }
+      
       ⚠️ Do NOT use all ingredients if they do not naturally go well together.  
       ✅ Only combine ingredients that make culinary and nutritional sense.  
       ❌ Avoid unusual or unappetizing combinations.  
       ✅ If the ingredients do not suffice for a tasty meal, suggest the closest viable option using only part of them or basic additions.
-      
-      Return:  
-      - Name of the dish  
-      - List of ingredients used  
-      - Preparation steps  
-      - Nutritional values (protein, carbs, fat, calories)
-
-      Format your response as a JSON object with these fields: 
-      {
-        "recipeName": "string",
-        "ingredients": ["string", "string", ...], 
-        "instructions": "string", 
-        "protein": number,
-        "carbs": number,
-        "fat": number,
-        "calories": number
-      }
       
       Ensure the response is valid JSON with no markdown or extra text.
     `;
@@ -98,28 +97,39 @@ serve(async (req) => {
       // If parsing fails, make a best effort to extract structured data
       const content = data.choices[0].message.content;
       recipeData = {
-        recipeName: extractTitle(content),
+        recipe_name: extractTitle(content),
         ingredients: extractIngredientsList(content),
         instructions: extractInstructions(content),
         protein: extractNutritionValue(content, 'protein'),
         carbs: extractNutritionValue(content, 'carbs'),
         fat: extractNutritionValue(content, 'fat'),
-        calories: extractNutritionValue(content, 'calories')
+        calories: extractNutritionValue(content, 'calories'),
+        image_prompt: extractImagePrompt(content)
       };
     }
 
-    // Generate a placeholder image URL based on recipe name
-    const imageUrl = `https://source.unsplash.com/random/800x600/?food,${encodeURIComponent(recipeData.recipeName.split(' ')[0])}`;
+    // Generate a placeholder image URL based on recipe name or use the provided image prompt for later
+    const imageUrl = `https://source.unsplash.com/random/800x600/?food,${encodeURIComponent(recipeData.recipe_name || recipeData.recipeName)}`;
+    
+    // Standardize the response format
+    const standardizedRecipe = {
+      recipeName: recipeData.recipe_name || recipeData.recipeName,
+      ingredients: Array.isArray(recipeData.ingredients) ? recipeData.ingredients : recipeData.ingredients.split('\n').map(i => i.trim()).filter(i => i),
+      instructions: recipeData.instructions,
+      protein: recipeData.protein,
+      carbs: recipeData.carbs,
+      fat: recipeData.fat,
+      calories: recipeData.calories,
+      imageUrl,
+      imagePrompt: recipeData.image_prompt || "",
+      cookingTime,
+      goals,
+      isFavorited: false
+    };
     
     // Return the recipe with additional fields
     return new Response(
-      JSON.stringify({
-        ...recipeData,
-        imageUrl,
-        cookingTime,
-        goals,
-        isFavorited: false
-      }),
+      JSON.stringify(standardizedRecipe),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
@@ -164,4 +174,11 @@ function extractNutritionValue(text, nutrientType) {
   const regex = new RegExp(`${nutrientType}:?\\s*(\\d+)`, 'i');
   const match = text.match(regex);
   return match ? parseInt(match[1], 10) : Math.floor(Math.random() * 30) + 10;
+}
+
+function extractImagePrompt(text) {
+  const promptSection = text.match(/(?:image prompt|image description|prompt):?.*?\n?(.*?)(?:\n\s*\n|$)/i);
+  if (!promptSection) return "Healthy, appetizing dish, professional food photography, bright natural lighting, fresh ingredients, styled plating";
+  
+  return promptSection[1].trim();
 }

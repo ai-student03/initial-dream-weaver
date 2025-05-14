@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Recipe, RecipeFormData } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
 export const useRecipeGeneration = (formData: RecipeFormData | null) => {
@@ -34,7 +34,11 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
         setRecipe(data);
       } catch (error) {
         console.error('Error generating recipe:', error);
-        toast.error('Failed to generate a recipe. Please try again.');
+        toast({
+          title: "Error",
+          description: "Failed to generate a recipe. Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
@@ -49,7 +53,11 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
       const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
       savedRecipes.push({...recipe, isFavorited: true});
       localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
-      toast.success('Recipe saved to your favorites!');
+      toast({
+        title: "Success",
+        description: "Recipe saved to your favorites!",
+        variant: "default",
+      });
     }
   };
 
