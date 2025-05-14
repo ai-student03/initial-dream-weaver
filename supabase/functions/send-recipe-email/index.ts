@@ -1,5 +1,5 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
@@ -25,28 +25,31 @@ serve(async (req) => {
 
     // Log email sending details for debugging
     console.log(`Sending recipe "${recipe.recipeName}" to ${email}`);
-
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // The real implementation would use an email service like Resend
-    /* 
-    // Example implementation with an email service like Resend
-    // You would need to add the RESEND_API_KEY to your Supabase secrets
     
+    // Initialize the Resend client with the API key
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
     
-    const { data, error } = await resend.emails.send({
-      from: "FiMe <recipes@yourdomain.com>",
+    // Check for Resend API key
+    if (!Deno.env.get('RESEND_API_KEY')) {
+      throw new Error('RESEND_API_KEY environment variable is not set');
+    }
+
+    // Generate HTML for the email
+    const emailHtml = generateEmailHtml(recipe);
+    
+    // Send the email using Resend
+    const { data, error: resendError } = await resend.emails.send({
+      from: "FiMe <onboarding@resend.dev>",
       to: [email],
       subject: `Your Recipe: ${recipe.recipeName}`,
-      html: generateEmailHtml(recipe),
+      html: emailHtml,
     });
 
-    if (error) {
-      throw new Error(`Email service error: ${error.message}`);
+    if (resendError) {
+      throw new Error(`Resend API error: ${resendError.message}`);
     }
-    */
+
+    console.log("Email sent successfully:", data);
 
     return new Response(
       JSON.stringify({ success: true, message: 'Email sent successfully' }),

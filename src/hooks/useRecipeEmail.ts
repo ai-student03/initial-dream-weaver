@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Recipe } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 export const useRecipeEmail = () => {
   const [emailLoading, setEmailLoading] = useState(false);
@@ -46,11 +46,19 @@ export const useRecipeEmail = () => {
       
       if (error) throw error;
       
-      toast.success('Recipe sent to your email!');
+      toast({
+        title: "Success!",
+        description: "Recipe sent to your email!",
+        variant: "default",
+      });
       setEmailSent(true);
     } catch (error) {
       console.error('Error sending email:', error);
-      toast.error('Failed to send the email. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to send the email. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setEmailLoading(false);
     }
