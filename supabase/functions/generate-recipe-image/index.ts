@@ -43,55 +43,61 @@ serve(async (req) => {
 
     // Call the FAL.ai API for image generation
     console.log(`Sending request to ${FAL_API_URL}...`);
-    const response = await fetch(FAL_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Key ${FAL_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        prompt: enhancedPrompt,
-        model: "realistic-vision-v5-1", // Using a high-quality food-compatible model
-        height: 768,
-        width: 768,
-        guidance_scale: 7.5,
-        num_inference_steps: 30,
-        seed: 42, // Fixed seed for consistency
-      })
-    });
-
-    // Log the response status
-    console.log(`FAL API response status: ${response.status}`);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('FAL API error:', errorText);
-      throw new Error(`FAL API error: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('FAL API response data:', JSON.stringify(data, null, 2));
     
-    const generatedImageUrl = data.images?.[0]?.url;
-
-    if (!generatedImageUrl) {
-      throw new Error('No image URL was returned from FAL API');
-    }
-
-    console.log('Successfully generated image:', generatedImageUrl);
-    
-    return new Response(
-      JSON.stringify({
-        success: true,
-        imageUrl: generatedImageUrl
-      }),
-      {
+    try {
+      const response = await fetch(FAL_API_URL, {
+        method: 'POST',
         headers: {
-          ...corsHeaders,
+          'Authorization': `Key ${FAL_API_KEY}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          prompt: enhancedPrompt,
+          model: "realistic-vision-v5-1", // Using a high-quality food-compatible model
+          height: 768,
+          width: 768,
+          guidance_scale: 7.5,
+          num_inference_steps: 30,
+          seed: 42, // Fixed seed for consistency
+        })
+      });
+
+      // Log the response status
+      console.log(`FAL API response status: ${response.status}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('FAL API error:', errorText);
+        throw new Error(`FAL API error: ${response.status} - ${errorText}`);
       }
-    );
+
+      const data = await response.json();
+      console.log('FAL API response data:', JSON.stringify(data, null, 2));
+      
+      const generatedImageUrl = data.images?.[0]?.url;
+
+      if (!generatedImageUrl) {
+        throw new Error('No image URL was returned from FAL API');
+      }
+
+      console.log('Successfully generated image:', generatedImageUrl);
+      
+      return new Response(
+        JSON.stringify({
+          success: true,
+          imageUrl: generatedImageUrl
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    } catch (apiError) {
+      console.error('Error calling FAL API:', apiError);
+      throw apiError; // Re-throw to be caught by the outer catch
+    }
   } catch (error) {
     console.error('Error in generate-recipe-image function:', error);
     
