@@ -62,14 +62,19 @@ serve(async (req) => {
     if (!generatedImageUrl) {
       throw new Error('No image URL was returned from FAL API');
     }
-
-    console.log('Successfully generated image:', generatedImageUrl);
-
-    return new Response(
-      JSON.stringify({ imageUrl: generatedImageUrl }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  } catch (error) {
+return new Response(
+  JSON.stringify({
+    success: true,
+    imageUrl: generatedImageUrl
+  }),
+  {
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'application/json'
+    }
+  }
+);
+ catch (error) {
     console.error('Error in generate-recipe-image function:', error);
     
     return new Response(
