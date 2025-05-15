@@ -30,8 +30,11 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
 
         if (error) throw error;
 
-        // Set the recipe data
-        setRecipe(data);
+        // Set the recipe data with imageUrl defaulting to empty string if not provided
+        setRecipe({
+          ...data,
+          imageUrl: data.imageUrl || ''
+        });
       } catch (error) {
         console.error('Error generating recipe:', error);
         toast({
