@@ -108,14 +108,41 @@ serve(async (req) => {
       };
     }
 
-    // Generate a better image URL based on recipe name using Unsplash
-    const recipeName = recipeData.recipe_name || recipeData.recipeName || "";
-    const cleanRecipeName = recipeName.toLowerCase()
-      .replace(/[^\w\s]/g, '')  // Remove special characters
-      .replace(/\s+/g, ',');    // Replace spaces with commas
-      
-    // Generate a high-quality food image URL
-    const imageUrl = `https://source.unsplash.com/featured/800x600/?food,${encodeURIComponent(cleanRecipeName)},dish,healthy`;
+    // Generate AI image using the FAL edge function
+    const imagePrompt = recipeData.image_prompt || "";
+    const recipeName = recipeData.recipe_name || recipeData.recipeName || "Healthy Recipe";
+    
+    console.log("Calling FAL image generation with prompt:", imagePrompt);
+    
+    // Call our image generation edge function
+    const imageResponse = await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/generate-recipe-image', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        prompt: imagePrompt,
+        recipeName: recipeName
+      })
+    });
+    
+    let imageUrl;
+    
+    if (imageResponse.ok) {
+      const imageData = await imageResponse.json();
+      imageUrl = imageData.imageUrl;
+      console.log("Successfully generated image:", imageUrl);
+    } else {
+      console.error("Failed to generate image, using fallback Unsplash image");
+      // Fallback to Unsplash if FAL generation fails
+      const cleanRecipeName = recipeName.toLowerCase()
+        .replace(/[^\w\s]/g, '')  // Remove special characters
+        .replace(/\s+/g, ',');    // Replace spaces with commas
+        
+      // Generate a high-quality food image URL
+      imageUrl = `https://source.unsplash.com/featured/800x600/?food,${encodeURIComponent(cleanRecipeName)},dish,healthy`;
+    }
     
     // Standardize the response format
     const standardizedRecipe = {

@@ -31,7 +31,7 @@ const RecipeEmailPrompt = ({ recipe, onSendEmail, emailLoading, emailSent }: Rec
   
   return (
     <div className="mt-6 p-4 bg-[#FFDAB9] bg-opacity-20 rounded-lg">
-      <p className="text-center mb-4">Like this recipe? Want me to send it to your email?</p>
+      <p className="text-center mb-4">Want to save this recipe with the AI-generated image?</p>
       
       {showEmailInput && !emailSent && (
         <div className="mb-3">
@@ -57,7 +57,7 @@ const RecipeEmailPrompt = ({ recipe, onSendEmail, emailLoading, emailSent }: Rec
             </>
           ) : emailSent ? (
             <>
-              <Check className="mr-2 h-4 w-4" /> Sent!
+              <Check className="mr-2 h-4 w-4" /> Sent with AI image!
             </>
           ) : showEmailInput ? (
             <>
