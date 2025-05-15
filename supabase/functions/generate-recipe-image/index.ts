@@ -26,6 +26,15 @@ serve(async (req) => {
       );
     }
 
+    // Log the API key (just the first few characters for security)
+    const apiKeyPreview = FAL_API_KEY ? `${FAL_API_KEY.slice(0, 3)}...${FAL_API_KEY.slice(-3)}` : 'undefined';
+    console.log(`FAL API Key status: ${FAL_API_KEY ? 'present' : 'missing'} (preview: ${apiKeyPreview})`);
+    
+    if (!FAL_API_KEY) {
+      console.error('FAL_API_KEY is not set in environment variables');
+      throw new Error('Missing FAL_API_KEY environment variable');
+    }
+
     // Construct a rich prompt for food image generation
     const enhancedPrompt = `A professional, appetizing photo of ${recipeName}: ${prompt}. Food photography style, top-down view, natural lighting, high resolution, restaurant-quality presentation, on a beautiful plate or dish, garnished appropriately.`;
     
@@ -33,6 +42,7 @@ serve(async (req) => {
     console.log(`Using prompt: ${enhancedPrompt}`);
 
     // Call the FAL.ai API for image generation
+    console.log(`Sending request to ${FAL_API_URL}...`);
     const response = await fetch(FAL_API_URL, {
       method: 'POST',
       headers: {
@@ -50,6 +60,9 @@ serve(async (req) => {
       })
     });
 
+    // Log the response status
+    console.log(`FAL API response status: ${response.status}`);
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('FAL API error:', errorText);
@@ -57,29 +70,45 @@ serve(async (req) => {
     }
 
     const data = await response.json();
+    console.log('FAL API response data:', JSON.stringify(data, null, 2));
+    
     const generatedImageUrl = data.images?.[0]?.url;
 
     if (!generatedImageUrl) {
       throw new Error('No image URL was returned from FAL API');
     }
-return new Response(
-  JSON.stringify({
-    success: true,
-    imageUrl: generatedImageUrl
-  }),
-  {
-    headers: {
-      ...corsHeaders,
-      'Content-Type': 'application/json'
-    }
-  }
-);
- catch (error) {
-    console.error('Error in generate-recipe-image function:', error);
+
+    console.log('Successfully generated image:', generatedImageUrl);
     
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        success: true,
+        imageUrl: generatedImageUrl
+      }),
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+  } catch (error) {
+    console.error('Error in generate-recipe-image function:', error);
+    
+    // Provide a fallback image using Unsplash for food
+    const fallbackUrl = `https://source.unsplash.com/featured/?food,dish,cooking,recipe&${Date.now()}`;
+    console.log('Using fallback image URL:', fallbackUrl);
+    
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: error.message,
+        imageUrl: fallbackUrl // Still return an image even on error
+      }),
+      { 
+        status: 200, // Return 200 even for errors since we're providing a fallback
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     );
   }
 });

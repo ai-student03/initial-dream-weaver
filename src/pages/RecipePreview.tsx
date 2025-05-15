@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,12 +21,6 @@ const RecipePreview = () => {
   const formData = location.state?.formData as RecipeFormData;
   const { recipe, loading, handleSaveRecipe } = useRecipeGeneration(formData);
   const { emailLoading, emailSent, sendRecipeEmail } = useRecipeEmail();
-  
-  useEffect(() => {
-    if (recipe) {
-      console.log("recipe.imageUrl is:", recipe.imageUrl);
-    }
-  }, [recipe]);
 
   if (loading) {
     return <RecipeLoadingState />;
@@ -52,9 +46,6 @@ const RecipePreview = () => {
     );
   }
 
-  // Also add a console log here to see the value immediately when recipe is available
-  console.log("recipe.imageUrl is:", recipe.imageUrl);
-
   return (
     <div className="container mx-auto py-8 px-4">
       <Card className="max-w-3xl mx-auto border-[#F8BBD0] shadow-md overflow-hidden">
@@ -67,12 +58,21 @@ const RecipePreview = () => {
         
         <CardContent className="pt-6 space-y-6">
           {recipe.imageUrl && (
-            <div className="flex justify-center mb-6">
+            <div className="flex flex-col items-center mb-6">
               <img 
                 src={recipe.imageUrl} 
                 alt={recipe.recipeName} 
                 className="rounded-xl max-h-64 object-cover shadow-sm"
+                onError={(e) => {
+                  console.error('Image failed to load:', e);
+                  e.currentTarget.src = 'https://source.unsplash.com/featured/?food,cooking';
+                }}
               />
+              <p className="text-xs text-muted-foreground mt-2">
+                {recipe.imageUrl.includes('unsplash.com') 
+                  ? 'Using a stock photo (AI image generation unavailable)' 
+                  : 'AI-generated image based on your ingredients'}
+              </p>
             </div>
           )}
           
