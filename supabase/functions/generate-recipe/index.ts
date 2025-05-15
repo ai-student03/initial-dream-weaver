@@ -108,8 +108,14 @@ serve(async (req) => {
       };
     }
 
-    // Generate a placeholder image URL based on recipe name or use the provided image prompt for later
-    const imageUrl = `https://source.unsplash.com/random/800x600/?food,${encodeURIComponent(recipeData.recipe_name || recipeData.recipeName)}`;
+    // Generate a better image URL based on recipe name using Unsplash
+    const recipeName = recipeData.recipe_name || recipeData.recipeName || "";
+    const cleanRecipeName = recipeName.toLowerCase()
+      .replace(/[^\w\s]/g, '')  // Remove special characters
+      .replace(/\s+/g, ',');    // Replace spaces with commas
+      
+    // Generate a high-quality food image URL
+    const imageUrl = `https://source.unsplash.com/featured/800x600/?food,${encodeURIComponent(cleanRecipeName)},dish,healthy`;
     
     // Standardize the response format
     const standardizedRecipe = {
