@@ -26,6 +26,7 @@ serve(async (req) => {
 
     // Log email sending details for debugging
     console.log(`Sending recipe "${recipe.recipeName}" to ${email}`);
+    console.log(`Recipe image URL: ${recipe.imageUrl}`);
     
     // Initialize the Resend client with the API key
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
@@ -68,6 +69,9 @@ serve(async (req) => {
 
 // Helper function to generate HTML for the email
 function generateEmailHtml(recipe) {
+  // Ensure we have an image URL, using a placeholder if not available
+  const imageUrl = recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking';
+  
   return `
     <!DOCTYPE html>
     <html>
@@ -95,7 +99,7 @@ function generateEmailHtml(recipe) {
         <h2>${recipe.recipeName}</h2>
       </div>
       
-      ${recipe.imageUrl ? `<img src="${recipe.imageUrl}" alt="${recipe.recipeName}" class="recipe-image">` : ''}
+      <img src="${imageUrl}" alt="${recipe.recipeName}" class="recipe-image">
       
       <div class="nutrition">
         <div>
