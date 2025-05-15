@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,17 @@ const RecipePreview = () => {
   const formData = location.state?.formData as RecipeFormData;
   const { recipe, loading, handleSaveRecipe } = useRecipeGeneration(formData);
   const { emailLoading, emailSent, sendRecipeEmail } = useRecipeEmail();
+  const [aiGeneratedImageUrl, setAiGeneratedImageUrl] = useState<string | null>(null);
+
+  const handleImageReceived = (imageUrl: string) => {
+    console.log("AI-generated image received in RecipePreview:", imageUrl);
+    setAiGeneratedImageUrl(imageUrl);
+    
+    // Update the recipe object with the new image URL
+    if (recipe) {
+      recipe.imageUrl = imageUrl;
+    }
+  };
 
   if (loading) {
     return <RecipeLoadingState />;
@@ -57,10 +68,10 @@ const RecipePreview = () => {
         </CardHeader>
         
         <CardContent className="pt-6 space-y-6">
-          {recipe.imageUrl && (
+          {(aiGeneratedImageUrl || recipe.imageUrl) && (
             <div className="flex flex-col items-center mb-6">
               <img 
-                src={recipe.imageUrl} 
+                src={aiGeneratedImageUrl || recipe.imageUrl} 
                 alt={recipe.recipeName} 
                 className="rounded-xl max-h-64 object-cover shadow-sm"
                 onError={(e) => {
@@ -69,9 +80,11 @@ const RecipePreview = () => {
                 }}
               />
               <p className="text-xs text-muted-foreground mt-2">
-                {recipe.imageUrl.includes('unsplash.com') 
-                  ? 'Using a stock photo (AI image generation in progress)' 
-                  : 'AI-generated image based on your ingredients'}
+                {aiGeneratedImageUrl 
+                  ? 'AI-generated image based on your ingredients' 
+                  : recipe.imageUrl.includes('unsplash.com') 
+                    ? 'Using a stock photo (AI image generation in progress)' 
+                    : 'AI-generated image based on your ingredients'}
               </p>
             </div>
           )}
@@ -87,14 +100,17 @@ const RecipePreview = () => {
           <RecipeIngredients ingredients={recipe.ingredients} />
           <RecipeInstructions instructions={recipe.instructions} />
           
-          {/* Still use the RecipeImagePrompt component but now it will send the prompt instead of displaying it */}
+          {/* Send the image prompt and register the callback to receive the image URL */}
           {recipe.imagePrompt && (
-            <RecipeImagePrompt prompt={recipe.imagePrompt} />
+            <RecipeImagePrompt 
+              prompt={recipe.imagePrompt} 
+              onImageReceived={handleImageReceived} 
+            />
           )}
           
           <RecipeEmailPrompt 
-            recipe={recipe} 
-            onSendEmail={() => sendRecipeEmail(recipe)} 
+            recipe={{...recipe, imageUrl: aiGeneratedImageUrl || recipe.imageUrl}}
+            onSendEmail={() => sendRecipeEmail({...recipe, imageUrl: aiGeneratedImageUrl || recipe.imageUrl})} 
             emailLoading={emailLoading} 
             emailSent={emailSent} 
           />

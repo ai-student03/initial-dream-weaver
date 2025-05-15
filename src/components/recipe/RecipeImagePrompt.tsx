@@ -6,9 +6,10 @@ import { toast } from '@/hooks/use-toast';
 
 interface RecipeImagePromptProps {
   prompt: string;
+  onImageReceived?: (imageUrl: string) => void;
 }
 
-const RecipeImagePrompt = ({ prompt }: RecipeImagePromptProps) => {
+const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) => {
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const webhookUrl = 'https://hook.eu2.make.com/uaqgnkl0rayez59wide2zfemmipykhie';
@@ -26,7 +27,6 @@ const RecipeImagePrompt = ({ prompt }: RecipeImagePromptProps) => {
           headers: {
             'Content-Type': 'application/json',
           },
-          mode: 'no-cors', // Add this to handle CORS
           body: JSON.stringify({
             imagePrompt: prompt,
             timestamp: new Date().toISOString()
@@ -35,6 +35,50 @@ const RecipeImagePrompt = ({ prompt }: RecipeImagePromptProps) => {
         
         console.log("Webhook request sent");
         setIsSent(true);
+        
+        // Set up event listener for the webhook response
+        const eventSource = new EventSource(`${webhookUrl}/listen`);
+        
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log("Received webhook response:", data);
+            
+            if (data.imageUrl) {
+              console.log("Image URL received:", data.imageUrl);
+              
+              // Call the callback function with the image URL
+              if (onImageReceived) {
+                onImageReceived(data.imageUrl);
+              }
+              
+              toast({
+                title: "Image received!",
+                description: "The AI-generated image for your recipe is ready.",
+                variant: "default",
+              });
+              
+              // Close the event source
+              eventSource.close();
+            }
+          } catch (err) {
+            console.error("Error parsing webhook response:", err);
+          }
+        };
+        
+        eventSource.onerror = (err) => {
+          console.error("EventSource error:", err);
+          eventSource.close();
+        };
+        
+        // Set a timeout to close the event source after 30 seconds
+        setTimeout(() => {
+          if (eventSource.readyState !== 2) { // 2 means CLOSED
+            console.log("Closing event source after timeout");
+            eventSource.close();
+          }
+        }, 30000);
+        
         toast({
           title: "Image prompt sent!",
           description: "The image prompt was sent to the image generation service.",
@@ -55,7 +99,7 @@ const RecipeImagePrompt = ({ prompt }: RecipeImagePromptProps) => {
     if (prompt) {
       sendPromptToWebhook();
     }
-  }, [prompt, webhookUrl, isSent]);
+  }, [prompt, webhookUrl, isSent, onImageReceived]);
   
   if (!prompt) return null;
   
@@ -69,7 +113,7 @@ const RecipeImagePrompt = ({ prompt }: RecipeImagePromptProps) => {
               <p className="text-sm text-muted-foreground">Sending image prompt to generation service...</p>
             </div>
           ) : isSent ? (
-            <p className="text-sm text-muted-foreground">Image prompt sent to generation service!</p>
+            <p className="text-sm text-muted-foreground">Image prompt sent! Waiting for the generated image...</p>
           ) : (
             <p className="text-sm text-muted-foreground">Processing image prompt...</p>
           )}

@@ -51,7 +51,7 @@ export const useRecipeEmail = () => {
       
       toast({
         title: "Success!",
-        description: "Recipe sent to your email!",
+        description: "Recipe sent to your email with the AI-generated image!",
         variant: "default",
       });
       setEmailSent(true);
