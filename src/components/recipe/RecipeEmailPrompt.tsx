@@ -41,6 +41,7 @@ const RecipeEmailPrompt = ({ recipe, onSendEmail, emailLoading, emailSent }: Rec
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email address"
             className="mb-2"
+            required
           />
         </div>
       )}
@@ -65,7 +66,7 @@ const RecipeEmailPrompt = ({ recipe, onSendEmail, emailLoading, emailSent }: Rec
             </>
           ) : (
             <>
-              <Mail className="mr-2 h-4 w-4" /> Send to my email
+              <Mail className="mr-2 h-4 w-4" /> Send to my email with image
             </>
           )}
         </Button>

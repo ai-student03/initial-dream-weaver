@@ -22,7 +22,7 @@ export const useRecipeEmail = () => {
         return;
       }
       
-      // Prepare the recipe data with all required fields
+      // Ensure imageUrl is defined and properly formatted
       const recipeData = {
         recipeName: recipe.recipeName,
         ingredients: recipe.ingredients,
@@ -33,8 +33,10 @@ export const useRecipeEmail = () => {
         calories: recipe.calories,
         cookingTime: recipe.cookingTime,
         goals: recipe.goals,
-        imageUrl: recipe.imageUrl
+        imageUrl: recipe.imageUrl || '' // Ensure imageUrl is always defined
       };
+      
+      console.log("Sending recipe email with data:", recipeData);
       
       // Call the send-recipe-email function
       const { data, error } = await supabase.functions.invoke('send-recipe-email', {
