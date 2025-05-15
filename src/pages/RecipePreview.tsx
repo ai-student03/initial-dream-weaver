@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,12 @@ const RecipePreview = () => {
   const formData = location.state?.formData as RecipeFormData;
   const { recipe, loading, handleSaveRecipe } = useRecipeGeneration(formData);
   const { emailLoading, emailSent, sendRecipeEmail } = useRecipeEmail();
+  
+  useEffect(() => {
+    if (recipe) {
+      console.log("recipe.imageUrl is:", recipe.imageUrl);
+    }
+  }, [recipe]);
 
   if (loading) {
     return <RecipeLoadingState />;
@@ -45,6 +51,9 @@ const RecipePreview = () => {
       </div>
     );
   }
+
+  // Also add a console log here to see the value immediately when recipe is available
+  console.log("recipe.imageUrl is:", recipe.imageUrl);
 
   return (
     <div className="container mx-auto py-8 px-4">
