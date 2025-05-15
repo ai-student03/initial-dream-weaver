@@ -33,10 +33,11 @@ export const useRecipeEmail = () => {
         calories: recipe.calories,
         cookingTime: recipe.cookingTime,
         goals: recipe.goals,
-        imageUrl: recipe.imageUrl || '' // Ensure imageUrl is always defined
+        imageUrl: recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking' // Always provide an image URL
       };
       
       console.log("Sending recipe email with data:", recipeData);
+      console.log("Image URL being sent:", recipeData.imageUrl);
       
       // Call the send-recipe-email function
       const { data, error } = await supabase.functions.invoke('send-recipe-email', {

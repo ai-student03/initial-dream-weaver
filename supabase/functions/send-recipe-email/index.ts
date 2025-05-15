@@ -72,6 +72,8 @@ function generateEmailHtml(recipe) {
   // Ensure we have an image URL, using a placeholder if not available
   const imageUrl = recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking';
   
+  console.log(`Using image URL in email HTML: ${imageUrl}`);
+  
   return `
     <!DOCTYPE html>
     <html>
