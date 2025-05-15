@@ -74,7 +74,9 @@ export default {
 				fime: {
 					peach: '#FFDAB9',
 					pink: '#F8BBD0',
-					coral: '#FF6F61'
+					coral: '#FF6F61',
+					green: '#8BC791',
+					softGray: '#F1F0FB'
 				}
 			},
 			borderRadius: {
@@ -119,7 +121,7 @@ export default {
 			},
 			backgroundImage: {
 				'gradient-soft': 'linear-gradient(to bottom right, #f8fafc, #f1f5f9)',
-				'gradient-fime': 'linear-gradient(to right, #FFDAB9, #F8BBD0)'
+				'gradient-fime': 'linear-gradient(to right, #F2FCE2, #FEC6A1)'
 			}
 		}
 	},

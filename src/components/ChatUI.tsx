@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { NutritionGoal, Recipe } from "@/lib/types";
 import { useNavigate } from 'react-router-dom';
-import { Send, Mic, ArrowDown, Check, Loader, Utensils } from "lucide-react";
+import { Send, Mic, ArrowDown, Check, Loader, MessageSquare } from "lucide-react";
 
 type Message = {
   role: 'assistant' | 'user';
@@ -131,10 +132,10 @@ export const ChatUI: React.FC = () => {
           <div className="w-full flex flex-col items-center">
             <Button 
               onClick={handleStepForward} 
-              className="mt-4 px-6 py-2 bg-[#FF6F61] hover:bg-[#ff5d4d] text-white"
+              className="mt-6 px-8 py-6 bg-[#8BC791] hover:bg-[#7AB682] text-white text-lg rounded-full shadow-md transition-all"
               size="lg"
             >
-              Get Started <ArrowDown className="ml-2 h-4 w-4" />
+              Get Started <ArrowDown className="ml-2 h-5 w-5" />
             </Button>
           </div>
         );
@@ -147,24 +148,25 @@ export const ChatUI: React.FC = () => {
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleUserInput()}
-              className="flex-grow border-[#F8BBD0] focus:border-[#FF6F61] focus-visible:ring-[#FF6F61]"
+              className="flex-grow border-[#FEC6A1] focus:border-[#8BC791] focus-visible:ring-[#8BC791] rounded-full py-6 text-base shadow-sm"
             />
             <Button 
               onClick={handleUserInput}
-              className="bg-[#FF6F61] hover:bg-[#ff5d4d]"
+              className="bg-[#8BC791] hover:bg-[#7AB682] rounded-full shadow-sm"
+              size="lg"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             </Button>
-            <Button variant="outline" className="border-[#F8BBD0]" disabled>
-              <Mic className="h-4 w-4 text-muted-foreground" />
+            <Button variant="outline" className="border-[#FEC6A1] rounded-full shadow-sm" disabled size="lg">
+              <Mic className="h-5 w-5 text-muted-foreground" />
             </Button>
           </div>
         );
       
       case 'goals':
         return (
-          <div className="space-y-4 w-full">
-            <div className="flex flex-wrap gap-2 justify-center">
+          <div className="space-y-6 w-full">
+            <div className="flex flex-wrap gap-3 justify-center">
               {NUTRITION_GOALS.map((goal) => (
                 <Button
                   key={goal}
@@ -176,9 +178,10 @@ export const ChatUI: React.FC = () => {
                   }}
                   variant={chatState.selectedGoals.includes(goal) ? "default" : "outline"}
                   className={chatState.selectedGoals.includes(goal) 
-                    ? "bg-[#FF6F61] hover:bg-[#ff5d4d] border-[#FF6F61]" 
-                    : "border-[#F8BBD0] hover:border-[#FF6F61]"
+                    ? "bg-[#8BC791] hover:bg-[#7AB682] border-[#8BC791] rounded-full shadow-sm" 
+                    : "border-[#FEC6A1] hover:border-[#8BC791] hover:bg-[#F1F0FB] rounded-full shadow-sm"
                   }
+                  size="lg"
                 >
                   {goal}
                   {chatState.selectedGoals.includes(goal) && <Check className="ml-2 h-4 w-4" />}
@@ -188,7 +191,8 @@ export const ChatUI: React.FC = () => {
             <Button 
               onClick={() => handleSelectGoals(chatState.selectedGoals)}
               disabled={chatState.selectedGoals.length === 0}
-              className="w-full bg-[#FF6F61] hover:bg-[#ff5d4d]"
+              className="w-full bg-[#8BC791] hover:bg-[#7AB682] rounded-full py-6 shadow-md text-lg"
+              size="lg"
             >
               Continue
             </Button>
@@ -197,8 +201,8 @@ export const ChatUI: React.FC = () => {
       
       case 'cookingTime':
         return (
-          <div className="space-y-4 w-full">
-            <div className="flex items-center space-x-2">
+          <div className="space-y-6 w-full">
+            <div className="flex items-center space-x-3 bg-[#F1F0FB] p-4 rounded-2xl shadow-sm">
               <Input
                 type="number"
                 min="5"
@@ -208,13 +212,15 @@ export const ChatUI: React.FC = () => {
                   ...chatState, 
                   cookingTime: parseInt(e.target.value) || 30 
                 })}
-                className="border-[#F8BBD0] focus:border-[#FF6F61] focus-visible:ring-[#FF6F61]"
+                className="border-[#FEC6A1] focus:border-[#8BC791] focus-visible:ring-[#8BC791] rounded-full text-lg"
+                size={5}
               />
-              <span className="text-muted-foreground">minutes</span>
+              <span className="text-lg text-muted-foreground">minutes</span>
             </div>
             <Button 
               onClick={() => handleSetCookingTime(chatState.cookingTime)}
-              className="w-full bg-[#FF6F61] hover:bg-[#ff5d4d]"
+              className="w-full bg-[#8BC791] hover:bg-[#7AB682] rounded-full py-6 shadow-md text-lg"
+              size="lg"
             >
               Find Me a Recipe
             </Button>
@@ -223,9 +229,9 @@ export const ChatUI: React.FC = () => {
       
       case 'generating':
         return (
-          <div className="flex items-center justify-center space-x-2 py-4">
-            <Loader className="h-5 w-5 animate-spin text-[#FF6F61]" />
-            <div className="text-muted-foreground">Thinking of something delicious just for you...</div>
+          <div className="flex items-center justify-center space-x-2 py-6 bg-[#F1F0FB] rounded-2xl shadow-sm">
+            <Loader className="h-6 w-6 animate-spin text-[#8BC791]" />
+            <div className="text-lg">Thinking of something delicious just for you...</div>
           </div>
         );
       
@@ -253,13 +259,30 @@ export const ChatUI: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] max-w-xl mx-auto">
+    <div className="flex flex-col max-w-2xl mx-auto bg-white rounded-3xl shadow-lg overflow-hidden border border-[#F1F0FB]">
+      {/* Welcome Card for the first step */}
+      {chatState.step === 'welcome' && (
+        <div className="p-6 bg-gradient-to-r from-[#F2FCE2] to-[#F1F0FB] rounded-t-3xl">
+          <div className="flex items-start space-x-4 mb-6">
+            <div className="bg-white p-3 rounded-full shadow-md">
+              <MessageSquare className="h-8 w-8 text-[#8BC791]" />
+            </div>
+            <div>
+              <h2 className="text-xl font-medium text-gray-800 mb-2">Welcome to FiMe</h2>
+              <p className="text-gray-600">
+                I'll help you create delicious, healthy meals with ingredients you already have at home.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-5 space-y-4 max-h-[500px] min-h-[300px]">
         {chatState.messages.map((message, index) => (
           <div 
             key={index} 
-            className={`flex ${message.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
+            className={`flex ${message.role === 'assistant' ? 'justify-start' : 'justify-end'} animate-bubble-in`}
           >
             <div 
               className={`flex max-w-[80%] ${
@@ -267,15 +290,15 @@ export const ChatUI: React.FC = () => {
               }`}
             >
               {message.role === 'assistant' && (
-                <Avatar className="h-8 w-8 mr-2 bg-[#FFDAB9] text-foreground">
-                  <span className="font-bold">Fi</span>
+                <Avatar className="h-10 w-10 mr-2 bg-[#F2FCE2] text-foreground border border-[#8BC791] shadow-sm">
+                  <span className="font-bold text-[#8BC791]">Fi</span>
                 </Avatar>
               )}
               <div 
-                className={`rounded-2xl px-4 py-2 ${
+                className={`rounded-2xl px-5 py-3 shadow-sm ${
                   message.role === 'assistant' 
-                    ? 'bg-[#F8BBD0] bg-opacity-30 text-foreground rounded-tl-none' 
-                    : 'bg-[#FF6F61] text-white rounded-tr-none'
+                    ? 'bg-[#F2FCE2] text-foreground rounded-tl-none' 
+                    : 'bg-[#8BC791] text-white rounded-tr-none'
                 }`}
               >
                 {message.content.split('\n').map((line, i) => (
@@ -292,7 +315,7 @@ export const ChatUI: React.FC = () => {
       </div>
       
       {/* Input Area */}
-      <div className="border-t p-4 bg-background">
+      <div className="border-t border-[#F1F0FB] p-5 bg-white">
         {renderInputBasedOnStep()}
       </div>
     </div>
