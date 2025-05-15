@@ -1,8 +1,7 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Image as ImageIcon, Copy } from 'lucide-react';
+import { Loader } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface RecipeImagePromptProps {
@@ -10,34 +9,70 @@ interface RecipeImagePromptProps {
 }
 
 const RecipeImagePrompt = ({ prompt }: RecipeImagePromptProps) => {
-  const handleCopyPrompt = () => {
-    navigator.clipboard.writeText(prompt);
-    toast({
-      title: "Copied!",
-      description: "Image prompt copied to clipboard",
-      variant: "default",
-    });
-  };
+  const [isSending, setIsSending] = useState(false);
+  const [isSent, setIsSent] = useState(false);
+  const webhookUrl = 'https://hook.eu2.make.com/uaqgnkl0rayez59wide2zfemmipykhie';
+  
+  useEffect(() => {
+    const sendPromptToWebhook = async () => {
+      if (!prompt || isSent) return;
+      
+      try {
+        setIsSending(true);
+        console.log("Sending image prompt to webhook:", prompt);
+        
+        const response = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          mode: 'no-cors', // Add this to handle CORS
+          body: JSON.stringify({
+            imagePrompt: prompt,
+            timestamp: new Date().toISOString()
+          }),
+        });
+        
+        console.log("Webhook request sent");
+        setIsSent(true);
+        toast({
+          title: "Image prompt sent!",
+          description: "The image prompt was sent to the image generation service.",
+          variant: "default",
+        });
+      } catch (error) {
+        console.error("Error sending prompt to webhook:", error);
+        toast({
+          title: "Error",
+          description: "Failed to send the image prompt to the service.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSending(false);
+      }
+    };
+    
+    if (prompt) {
+      sendPromptToWebhook();
+    }
+  }, [prompt, webhookUrl, isSent]);
   
   if (!prompt) return null;
   
   return (
     <Card className="bg-[#FFDAB9] bg-opacity-20 border-[#F8BBD0]">
       <CardContent className="pt-4 pb-4">
-        <div className="flex items-start gap-2">
-          <ImageIcon className="h-5 w-5 mt-1 text-[#FF6F61]" />
-          <div className="flex-1">
-            <h4 className="font-semibold text-sm mb-1">AI Image Prompt</h4>
-            <p className="text-sm text-muted-foreground mb-2">{prompt}</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-1 text-xs border-[#F8BBD0] hover:border-[#FF6F61]"
-              onClick={handleCopyPrompt}
-            >
-              <Copy className="h-3 w-3 mr-1" /> Copy Prompt
-            </Button>
-          </div>
+        <div className="flex items-center justify-center">
+          {isSending ? (
+            <div className="flex flex-col items-center">
+              <Loader className="h-5 w-5 animate-spin text-[#FF6F61] mb-2" />
+              <p className="text-sm text-muted-foreground">Sending image prompt to generation service...</p>
+            </div>
+          ) : isSent ? (
+            <p className="text-sm text-muted-foreground">Image prompt sent to generation service!</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">Processing image prompt...</p>
+          )}
         </div>
       </CardContent>
     </Card>

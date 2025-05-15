@@ -70,7 +70,7 @@ const RecipePreview = () => {
               />
               <p className="text-xs text-muted-foreground mt-2">
                 {recipe.imageUrl.includes('unsplash.com') 
-                  ? 'Using a stock photo (AI image generation unavailable)' 
+                  ? 'Using a stock photo (AI image generation in progress)' 
                   : 'AI-generated image based on your ingredients'}
               </p>
             </div>
@@ -87,6 +87,7 @@ const RecipePreview = () => {
           <RecipeIngredients ingredients={recipe.ingredients} />
           <RecipeInstructions instructions={recipe.instructions} />
           
+          {/* Still use the RecipeImagePrompt component but now it will send the prompt instead of displaying it */}
           {recipe.imagePrompt && (
             <RecipeImagePrompt prompt={recipe.imagePrompt} />
           )}
