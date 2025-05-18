@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 export const useRecipeGeneration = (formData: RecipeFormData | null) => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
+  const [regenerationCount, setRegenerationCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,7 +25,9 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
           body: {
             ingredients: formData.ingredients,
             goals: formData.goals,
-            cookingTime: formData.cookingTime
+            cookingTime: formData.cookingTime,
+            regenerationCount: regenerationCount,
+            differentIdea: regenerationCount > 0 ? true : false
           }
         });
 
@@ -51,7 +54,7 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
     };
 
     generateRecipe();
-  }, [formData, navigate]);
+  }, [formData, navigate, regenerationCount]);
 
   const saveSearchToHistory = async (formData: RecipeFormData, recipeData: Recipe) => {
     try {
@@ -91,5 +94,10 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
     }
   };
 
-  return { recipe, loading, handleSaveRecipe };
+  const handleRegenerateRecipe = () => {
+    setLoading(true);
+    setRegenerationCount(prevCount => prevCount + 1);
+  };
+
+  return { recipe, loading, handleSaveRecipe, handleRegenerateRecipe };
 };

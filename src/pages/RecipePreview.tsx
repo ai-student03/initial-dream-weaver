@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RecipeFormData } from '@/lib/types';
-import { Utensils } from 'lucide-react';
+import { Utensils, RefreshCw } from 'lucide-react';
 import RecipeNutritionInfo from '@/components/recipe/RecipeNutritionInfo';
 import RecipeGoals from '@/components/recipe/RecipeGoals';
 import RecipeIngredients from '@/components/recipe/RecipeIngredients';
@@ -18,7 +18,7 @@ const RecipePreview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const formData = location.state?.formData as RecipeFormData;
-  const { recipe, loading, handleSaveRecipe } = useRecipeGeneration(formData);
+  const { recipe, loading, handleSaveRecipe, handleRegenerateRecipe } = useRecipeGeneration(formData);
   const { emailLoading, emailSent, sendRecipeEmail } = useRecipeEmail();
 
   if (loading) {
@@ -66,6 +66,18 @@ const RecipePreview = () => {
           <RecipeGoals goals={recipe.goals} />
           <RecipeIngredients ingredients={recipe.ingredients} />
           <RecipeInstructions instructions={recipe.instructions} />
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+            <Button 
+              variant="outline"
+              onClick={handleRegenerateRecipe}
+              className="flex items-center justify-center"
+              disabled={loading}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Give Me Another Idea
+            </Button>
+          </div>
           
           <RecipeEmailPrompt 
             recipe={recipe}

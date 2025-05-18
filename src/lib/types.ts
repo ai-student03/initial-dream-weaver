@@ -38,6 +38,16 @@ export type NutritionProfile = {
   favoriteIngredients: string[];
 };
 
+export type SearchHistory = {
+  id: string;
+  ingredients: string;
+  goal: string;
+  cookingTime: number;
+  recipeName: string;
+  recipeDetails: Recipe;
+  createdAt: string;
+};
+
 // Adding the missing types for TaskFlow components
 export type Priority = 'low' | 'medium' | 'high';
 
@@ -56,14 +66,4 @@ export type Task = {
   dueDate?: Date;
   priority: Priority;
   tags: Tag[];
-};
-
-export type SearchHistory = {
-  id: string;
-  ingredients: string;
-  goal: string;
-  cookingTime: number;
-  recipeName: string;
-  recipeDetails: Recipe;
-  createdAt: string;
 };
