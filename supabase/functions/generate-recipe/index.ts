@@ -33,17 +33,41 @@ serve(async (req) => {
       );
     }
 
-    // Construct our prompt
-    let prompt = `Act as a professional nutritionist. Based on:
-Ingredients: ${ingredients}
-Goal: ${goals.join(", ")}
-Time: ${cookingTime} minutes
+    // Construct our improved prompt
+    let prompt = `Act as a professional nutritionist and recipe creator.
 
-Suggest one healthy and satisfying meal that matches the user's goal. Include:
-- Dish name
-- Ingredient list
-- Preparation steps
-- Nutritional values: protein, carbs, fat, calories`;
+The user has the following inputs:
+
+Ingredients: ${ingredients}  
+Goal: ${goals.join(", ")}  
+Cooking time: ${cookingTime} minutes
+
+Your task:
+- Suggest one healthy, filling recipe that fits the user's nutritional goal.
+- Use only the ingredients that logically fit together — you don't have to use all of them.
+- Be creative! If "eggs" is one of the ingredients, you can use just the yolk or white.
+- Do NOT treat the ingredients as one block — each can be used partially or reinterpreted.
+
+Format your answer exactly like this:
+
+---
+
+**Recipe Name**  
+[Give the name of the dish]
+
+**Ingredients**  
+[List the ingredients with quantities, e.g., 2 eggs, 1 slice whole grain bread, 1/2 tomato]
+
+**Preparation Instructions**  
+1. [Step-by-step instructions written clearly]  
+2. [Each step should be a full sentence]  
+3. [Make sure they're easy to follow and cover the whole process]
+
+**Nutritional Information**  
+Protein: ~Xg  
+Carbs: ~Xg  
+Fat: ~Xg  
+Calories: ~X`;
 
     // If this is a regeneration request, add the instruction for a different idea
     if (differentIdea) {
@@ -58,7 +82,7 @@ Suggest one healthy and satisfying meal that matches the user's goal. Include:
         "Authorization": `Bearer ${openaiApiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o", // Using the most recent model
+        model: "gpt-4o", // Using GPT-4o for better recipe generation
         messages: [
           {
             role: "system",
@@ -88,12 +112,12 @@ Suggest one healthy and satisfying meal that matches the user's goal. Include:
     console.log("AI Response:", aiResponse);
     
     // Use a regex pattern to extract the dish name (first line or line after any separator)
-    const dishNamePattern = /(?:^|\n\n)(?:Dish name:|#|\*\*|)?\s*([^\n]+)/i;
+    const dishNamePattern = /(?:Recipe Name|**Recipe Name**)\s*[\r\n]+\s*([^\r\n]+)/i;
     const dishNameMatch = aiResponse.match(dishNamePattern);
     const dishName = dishNameMatch ? dishNameMatch[1].replace(/:/g, "").trim() : "Healthy Recipe";
     
     // Extract ingredients
-    const ingredientsPattern = /(?:Ingredients?:|(?:\n\n)|(?:-{3,}))\s*([\s\S]*?)(?:\n\n|Preparation|Instructions|Steps|Method|Directions|Nutritional|$)/i;
+    const ingredientsPattern = /(?:Ingredients|**Ingredients**)\s*[\r\n]+([\s\S]*?)(?=\s*(?:Preparation|Instructions|\*\*Preparation|\*\*Instructions))/i;
     const ingredientsMatch = aiResponse.match(ingredientsPattern);
     let ingredientList: string[] = [];
     
@@ -106,22 +130,16 @@ Suggest one healthy and satisfying meal that matches the user's goal. Include:
     }
     
     // Extract instructions
-    const instructionsPattern = /(?:Instructions|Preparation|Steps|Method|Directions):\s*([\s\S]*?)(?:\n\n|Nutritional|$)/i;
+    const instructionsPattern = /(?:Preparation Instructions|Instructions|**Preparation Instructions**|**Instructions**)\s*[\r\n]+([\s\S]*?)(?=\s*(?:Nutritional|**Nutritional|$))/i;
     const instructionsMatch = aiResponse.match(instructionsPattern);
     let instructions = "";
     
     if (instructionsMatch && instructionsMatch[1]) {
       instructions = instructionsMatch[1].trim();
-    } else {
-      // If no specific section found, try to use the remaining text
-      const restOfContent = aiResponse.split(/(?:Ingredients?:|(?:\n\n)|(?:-{3,}))\s*[\s\S]*?(?:\n\n|Preparation|Instructions|Steps|Method|Directions|$)/i)[1];
-      if (restOfContent) {
-        instructions = restOfContent.trim();
-      }
     }
     
     // Extract nutritional information
-    const nutritionPattern = /(?:Nutritional values:|Nutrition:|Nutritional information:)\s*([\s\S]*?)$/i;
+    const nutritionPattern = /(?:Nutritional Information|**Nutritional Information**)\s*[\r\n]+([\s\S]*?)$/i;
     const nutritionMatch = aiResponse.match(nutritionPattern);
     
     let protein = 0;
@@ -133,19 +151,19 @@ Suggest one healthy and satisfying meal that matches the user's goal. Include:
       const nutritionText = nutritionMatch[1].trim();
       
       // Extract protein
-      const proteinMatch = nutritionText.match(/Protein:?\s*(\d+)(?:\.\d+)?(?:\s*)?g/i);
+      const proteinMatch = nutritionText.match(/Protein:?\s*~?(\d+)(?:\.\d+)?(?:\s*)?g/i);
       if (proteinMatch) protein = parseFloat(proteinMatch[1]);
       
       // Extract carbs
-      const carbsMatch = nutritionText.match(/Carbs:?\s*(\d+)(?:\.\d+)?(?:\s*)?g/i);
+      const carbsMatch = nutritionText.match(/Carbs:?\s*~?(\d+)(?:\.\d+)?(?:\s*)?g/i);
       if (carbsMatch) carbs = parseFloat(carbsMatch[1]);
       
       // Extract fat
-      const fatMatch = nutritionText.match(/Fat:?\s*(\d+)(?:\.\d+)?(?:\s*)?g/i);
+      const fatMatch = nutritionText.match(/Fat:?\s*~?(\d+)(?:\.\d+)?(?:\s*)?g/i);
       if (fatMatch) fat = parseFloat(fatMatch[1]);
       
       // Extract calories
-      const caloriesMatch = nutritionText.match(/Calories:?\s*(\d+)(?:\.\d+)?/i);
+      const caloriesMatch = nutritionText.match(/Calories:?\s*~?(\d+)(?:\.\d+)?/i);
       if (caloriesMatch) calories = parseFloat(caloriesMatch[1]);
     }
     
