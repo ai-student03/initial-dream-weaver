@@ -8,20 +8,24 @@ interface RecipeInstructionsProps {
 const RecipeInstructions = ({ instructions }: RecipeInstructionsProps) => {
   // Format instructions to properly handle numbered lists
   const formatInstructions = () => {
-    // Check if instructions already contain numbered steps (1., 2., etc.)
-    if (/^\d+\.\s/.test(instructions.split('\n')[0])) {
+    if (!instructions) return <p>No instructions available</p>;
+    
+    // If instructions already contain numbered steps (1., 2., etc.)
+    if (/^\d+\.\s/m.test(instructions)) {
       return instructions.split('\n').map((step, index) => (
-        <p key={index} className="py-1">{step}</p>
+        <p key={index} className="py-1">{step.trim()}</p>
       ));
     }
     
     // If not, format as a numbered list
-    return instructions.split('\n').filter(line => line.trim() !== '').map((step, index) => (
-      <div key={index} className="flex gap-2 py-1">
-        <span className="font-medium">{index + 1}.</span>
-        <span>{step}</span>
-      </div>
-    ));
+    return instructions.split('\n')
+      .filter(line => line.trim() !== '')
+      .map((step, index) => (
+        <div key={index} className="flex gap-2 py-1">
+          <span className="font-medium">{index + 1}.</span>
+          <span>{step.trim()}</span>
+        </div>
+      ));
   };
 
   return (

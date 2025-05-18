@@ -74,6 +74,8 @@ Calories: ~X`;
       prompt += "\n\nGive a different idea than before.";
     }
 
+    console.log("Calling OpenAI with prompt:", prompt.substring(0, 100) + "...");
+
     // Make direct fetch request to OpenAI API instead of using the client library
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -111,13 +113,13 @@ Calories: ~X`;
     const aiResponse = data.choices[0].message?.content || "";
     console.log("AI Response:", aiResponse);
     
-    // Use a regex pattern to extract the dish name (first line or line after any separator)
-    const dishNamePattern = /(?:Recipe Name|**Recipe Name**)\s*[\r\n]+\s*([^\r\n]+)/i;
+    // Fix the regex patterns by properly escaping special characters
+    const dishNamePattern = /(?:Recipe Name|\*\*Recipe Name\*\*)\s*[\r\n]+\s*([^\r\n]+)/i;
     const dishNameMatch = aiResponse.match(dishNamePattern);
     const dishName = dishNameMatch ? dishNameMatch[1].replace(/:/g, "").trim() : "Healthy Recipe";
     
     // Extract ingredients
-    const ingredientsPattern = /(?:Ingredients|**Ingredients**)\s*[\r\n]+([\s\S]*?)(?=\s*(?:Preparation|Instructions|\*\*Preparation|\*\*Instructions))/i;
+    const ingredientsPattern = /(?:Ingredients|\*\*Ingredients\*\*)\s*[\r\n]+([\s\S]*?)(?=\s*(?:Preparation|Instructions|\*\*Preparation|\*\*Instructions))/i;
     const ingredientsMatch = aiResponse.match(ingredientsPattern);
     let ingredientList: string[] = [];
     
@@ -130,7 +132,7 @@ Calories: ~X`;
     }
     
     // Extract instructions
-    const instructionsPattern = /(?:Preparation Instructions|Instructions|**Preparation Instructions**|**Instructions**)\s*[\r\n]+([\s\S]*?)(?=\s*(?:Nutritional|**Nutritional|$))/i;
+    const instructionsPattern = /(?:Preparation Instructions|Instructions|\*\*Preparation Instructions\*\*|\*\*Instructions\*\*)\s*[\r\n]+([\s\S]*?)(?=\s*(?:Nutritional|\*\*Nutritional|$))/i;
     const instructionsMatch = aiResponse.match(instructionsPattern);
     let instructions = "";
     
@@ -139,7 +141,7 @@ Calories: ~X`;
     }
     
     // Extract nutritional information
-    const nutritionPattern = /(?:Nutritional Information|**Nutritional Information**)\s*[\r\n]+([\s\S]*?)$/i;
+    const nutritionPattern = /(?:Nutritional Information|\*\*Nutritional Information\*\*)\s*[\r\n]+([\s\S]*?)$/i;
     const nutritionMatch = aiResponse.match(nutritionPattern);
     
     let protein = 0;
