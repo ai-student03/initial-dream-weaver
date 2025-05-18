@@ -8,12 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
+import { Loader } from 'lucide-react';
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   
   useEffect(() => {
     const checkUser = async () => {
@@ -28,6 +30,7 @@ const Auth: React.FC = () => {
   
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
     
     if (!email || !password) {
       toast.error('Please enter both email and password');
@@ -36,15 +39,24 @@ const Auth: React.FC = () => {
     
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
       });
       
       if (error) throw error;
       
-      toast.success('Success! Please check your email to verify your account');
+      if (data.user) {
+        toast.success('Success! Please check your email to verify your account');
+      } else {
+        toast.warning('Something went wrong. Please try again.');
+      }
     } catch (error: any) {
+      console.error('Signup error:', error);
+      setErrorMessage(error.message || 'An error occurred during sign up');
       toast.error(error.message || 'An error occurred during sign up');
     } finally {
       setLoading(false);
@@ -53,6 +65,7 @@ const Auth: React.FC = () => {
   
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
     
     if (!email || !password) {
       toast.error('Please enter both email and password');
@@ -70,6 +83,8 @@ const Auth: React.FC = () => {
       
       navigate('/');
     } catch (error: any) {
+      console.error('Signin error:', error);
+      setErrorMessage(error.message || 'An error occurred during sign in');
       toast.error(error.message || 'An error occurred during sign in');
     } finally {
       setLoading(false);
@@ -121,8 +136,19 @@ const Auth: React.FC = () => {
                       required
                     />
                   </div>
+                  {errorMessage && (
+                    <div className="p-3 text-sm bg-red-50 border border-red-200 text-red-600 rounded-lg">
+                      {errorMessage}
+                    </div>
+                  )}
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Signing in...' : 'Sign In'}
+                    {loading ? (
+                      <>
+                        <Loader className="mr-2 h-4 w-4 animate-spin" /> Signing in...
+                      </>
+                    ) : (
+                      'Sign In'
+                    )}
                   </Button>
                 </form>
               </TabsContent>
@@ -148,10 +174,25 @@ const Auth: React.FC = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      minLength={6}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Password must be at least 6 characters
+                    </p>
                   </div>
+                  {errorMessage && (
+                    <div className="p-3 text-sm bg-red-50 border border-red-200 text-red-600 rounded-lg">
+                      {errorMessage}
+                    </div>
+                  )}
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Signing up...' : 'Sign Up'}
+                    {loading ? (
+                      <>
+                        <Loader className="mr-2 h-4 w-4 animate-spin" /> Signing up...
+                      </>
+                    ) : (
+                      'Sign Up'
+                    )}
                   </Button>
                 </form>
               </TabsContent>
