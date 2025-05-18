@@ -55,14 +55,19 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
 
   const saveSearchToHistory = async (formData: RecipeFormData, recipeData: Recipe) => {
     try {
+      // Convert the recipe data to a plain JSON-serializable object
+      // This removes any Date objects which aren't directly serializable
+      const recipeDetailsJson = JSON.parse(JSON.stringify(recipeData));
+      
       const { error } = await supabase
         .from('searches')
         .insert({
+          user_id: (await supabase.auth.getSession()).data.session?.user.id,
           ingredients: formData.ingredients,
           goal: formData.goals.join(', '),
           cooking_time: formData.cookingTime,
           recipe_name: recipeData.recipeName,
-          recipe_details: recipeData
+          recipe_details: recipeDetailsJson
         });
         
       if (error) throw error;

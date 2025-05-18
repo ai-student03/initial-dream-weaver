@@ -52,7 +52,20 @@ const History = () => {
           
         if (error) throw error;
         
-        setSearches(data || []);
+        // Map the Supabase data to our SearchHistory type
+        if (data) {
+          const searchHistory: SearchHistory[] = data.map(item => ({
+            id: item.id,
+            ingredients: item.ingredients,
+            goal: item.goal,
+            cookingTime: item.cooking_time,
+            recipeName: item.recipe_name,
+            recipeDetails: item.recipe_details,
+            createdAt: item.created_at
+          }));
+          
+          setSearches(searchHistory);
+        }
       } catch (error) {
         console.error('Error loading search history:', error);
         toast({
