@@ -22,12 +22,24 @@ export const useRecipeEmail = () => {
         return;
       }
       
-      // Ensure imageUrl is defined and properly formatted
+      // Ensure imageUrl is defined with a good fallback
       let imageUrl = recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking';
       
       // Make sure the URL uses HTTPS
       if (imageUrl.startsWith('http://')) {
         imageUrl = imageUrl.replace('http://', 'https://');
+      }
+      
+      // Make sure imageUrl is properly URL-encoded for Unsplash images
+      if (imageUrl.includes('unsplash.com') && imageUrl.includes(',')) {
+        const baseUrl = imageUrl.split('?')[0];
+        const params = imageUrl.split('?')[1] || '';
+        
+        // Re-encode any commas in the query string
+        const keywords = baseUrl.split('/').pop()?.split(',') || [];
+        const encodedKeywords = keywords.map(k => encodeURIComponent(k)).join(',');
+        
+        imageUrl = `${baseUrl.split(',')[0]}/${encodedKeywords}?${params}`;
       }
       
       // Add a timestamp parameter to all image URLs to prevent caching issues

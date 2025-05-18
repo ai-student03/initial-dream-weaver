@@ -23,15 +23,19 @@ const RecipePreview = () => {
   const { recipe, loading, handleSaveRecipe } = useRecipeGeneration(formData);
   const { emailLoading, emailSent, sendRecipeEmail } = useRecipeEmail();
   const [aiGeneratedImageUrl, setAiGeneratedImageUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
 
   const handleImageReceived = (imageUrl: string) => {
     console.log("AI-generated image received in RecipePreview:", imageUrl);
     
     try {
-      // Validate URL
-      new URL(imageUrl);
+      // Basic URL validation
+      if (!imageUrl.startsWith('http')) {
+        throw new Error('Invalid URL format');
+      }
       
       setAiGeneratedImageUrl(imageUrl);
+      setImageError(false);
       
       // Update the recipe object with the new image URL
       if (recipe) {
@@ -40,12 +44,30 @@ const RecipePreview = () => {
       }
     } catch (error) {
       console.error("Invalid image URL received:", error);
+      setImageError(true);
       toast({
         title: "Image Error",
         description: "Received an invalid image URL. Using fallback image instead.",
         variant: "destructive",
       });
     }
+  };
+
+  const handleImageError = () => {
+    console.log("Image failed to load, using fallback");
+    setImageError(true);
+    
+    // Generate a fallback URL based on recipe name
+    const keywords = recipe?.recipeName.replace(/\s+/g, ',') || 'food,recipe';
+    const fallbackUrl = `https://source.unsplash.com/featured/?food,${keywords}&${Date.now()}`;
+    
+    // Update the recipe with the fallback URL
+    if (recipe) {
+      recipe.imageUrl = fallbackUrl;
+    }
+    
+    // Update state with the fallback
+    setAiGeneratedImageUrl(fallbackUrl);
   };
 
   if (loading) {
@@ -96,20 +118,17 @@ const RecipePreview = () => {
                   src={aiGeneratedImageUrl || recipe.imageUrl} 
                   alt={recipe.recipeName} 
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error('Image failed to load:', e);
-                    // Provide a more specific food-related fallback image
-                    const fallbackUrl = `https://source.unsplash.com/featured/?food,${recipe.recipeName.replace(/\s+/g, ',')}&${Date.now()}`;
-                    e.currentTarget.src = fallbackUrl;
-                  }}
+                  onError={handleImageError}
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                {aiGeneratedImageUrl 
-                  ? 'AI-generated image based on your ingredients' 
-                  : recipe.imageUrl.includes('unsplash.com') 
-                    ? 'Using a stock photo (AI image generation in progress)' 
-                    : 'AI-generated image based on your ingredients'}
+                {imageError
+                  ? 'Using a stock photo for your recipe'
+                  : aiGeneratedImageUrl 
+                    ? 'AI-generated image based on your ingredients' 
+                    : recipe.imageUrl.includes('unsplash.com') 
+                      ? 'Using a stock photo (AI image generation in progress)' 
+                      : 'AI-generated image based on your ingredients'}
               </p>
             </div>
           )}

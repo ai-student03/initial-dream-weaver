@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RecipeImagePromptProps {
   prompt: string;
@@ -12,61 +13,58 @@ interface RecipeImagePromptProps {
 const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) => {
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
-  const [isEventSourceActive, setIsEventSourceActive] = useState(false);
-  const [webhookError, setWebhookError] = useState(false);
-  const webhookUrl = 'https://hook.eu2.make.com/uaqgnkl0rayez59wide2zfemmipykhie';
+  const [isGenerating, setIsGenerating] = useState(false);
   
   useEffect(() => {
-    const sendPromptToWebhook = async () => {
+    const generateImage = async () => {
       if (!prompt || isSent) return;
       
       try {
         setIsSending(true);
-        console.log("Sending image prompt to webhook:", prompt);
+        console.log("Generating image with prompt:", prompt);
         
-        // Set a timeout for the webhook request
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-        
-        const response = await fetch(webhookUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            imagePrompt: prompt,
-            timestamp: new Date().toISOString()
-          }),
-          signal: controller.signal
-        }).catch(error => {
-          console.error("Fetch error:", error);
-          throw new Error("Network error when connecting to the webhook");
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          throw new Error(`Webhook responded with status: ${response.status}`);
-        }
-        
-        console.log("Webhook request sent successfully");
-        setIsSent(true);
-        
-        // Set up event listener for the webhook response with a fallback
-        setTimeout(() => {
-          // If we're still waiting after 2 seconds, provide a fallback image
-          if (!webhookError) {
-            console.log("Using fallback image due to slow webhook response");
+        // Create a fallback that will be used if the image generation takes too long
+        const fallbackTimer = setTimeout(() => {
+          if (!isSent) {
+            console.log("Image generation taking too long, using fallback...");
             useFallbackImage();
           }
-        }, 2000);
+        }, 3000);
         
+        setIsGenerating(true);
+        
+        // Call the Supabase Edge Function instead of the webhook
+        const { data, error } = await supabase.functions.invoke('generate-recipe-image', {
+          body: { 
+            prompt: prompt,
+            recipeName: prompt.split(':')[0] || 'Recipe'
+          }
+        });
+        
+        clearTimeout(fallbackTimer);
+        
+        if (error) {
+          console.error("Supabase function error:", error);
+          throw new Error(`Error calling image generation function: ${error.message}`);
+        }
+        
+        console.log("Image generation response:", data);
+        
+        if (data?.imageUrl) {
+          console.log("Successfully generated image:", data.imageUrl);
+          setIsSent(true);
+          
+          if (onImageReceived) {
+            onImageReceived(data.imageUrl);
+          }
+        } else {
+          throw new Error("No image URL in response");
+        }
       } catch (error) {
-        console.error("Error sending prompt to webhook:", error);
-        setWebhookError(true);
+        console.error("Error generating image:", error);
         toast({
           title: "Image Generation Error",
-          description: "Unable to connect to image service. Using a stock image instead.",
+          description: "Unable to generate recipe image. Using a stock image instead.",
           variant: "destructive",
         });
         
@@ -74,6 +72,7 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
         useFallbackImage();
       } finally {
         setIsSending(false);
+        setIsGenerating(false);
       }
     };
     
@@ -88,15 +87,17 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
       const fallbackUrl = `https://source.unsplash.com/featured/?food,${encodeURIComponent(keywords)}&${Date.now()}`;
       console.log("Using fallback image URL:", fallbackUrl);
       
+      setIsSent(true);
+      
       if (onImageReceived) {
         onImageReceived(fallbackUrl);
       }
     };
     
     if (prompt) {
-      sendPromptToWebhook();
+      generateImage();
     }
-  }, [prompt, webhookUrl, isSent, onImageReceived]);
+  }, [prompt, onImageReceived, isSent]);
   
   if (!prompt) return null;
   
@@ -107,12 +108,12 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
           {isSending ? (
             <div className="flex flex-col items-center">
               <Loader className="h-5 w-5 animate-spin text-[#FF6F61] mb-2" />
-              <p className="text-sm text-muted-foreground">Preparing recipe image...</p>
+              <p className="text-sm text-muted-foreground">
+                {isGenerating ? "Generating your recipe image..." : "Preparing recipe image..."}
+              </p>
             </div>
-          ) : webhookError ? (
-            <p className="text-sm text-muted-foreground">Using a stock food image for your recipe.</p>
           ) : isSent ? (
-            <p className="text-sm text-muted-foreground">Image request sent! Your recipe will display shortly.</p>
+            <p className="text-sm text-muted-foreground">Recipe image generated successfully!</p>
           ) : (
             <p className="text-sm text-muted-foreground">Preparing your recipe image...</p>
           )}
