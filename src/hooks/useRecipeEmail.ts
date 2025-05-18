@@ -22,13 +22,16 @@ export const useRecipeEmail = () => {
         return;
       }
       
-      // Ensure imageUrl is defined and properly formatted - add a timestamp to prevent caching
+      // Ensure imageUrl is defined and properly formatted
       let imageUrl = recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking';
       
-      // Add a timestamp parameter to Unsplash URLs to prevent caching issues
-      if (imageUrl.includes('unsplash.com') && !imageUrl.includes('&t=')) {
-        imageUrl = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+      // Make sure the URL uses HTTPS
+      if (imageUrl.startsWith('http://')) {
+        imageUrl = imageUrl.replace('http://', 'https://');
       }
+      
+      // Add a timestamp parameter to all image URLs to prevent caching issues
+      imageUrl = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
       
       console.log("Sending recipe email with data:", recipe);
       console.log("Image URL being sent:", imageUrl);
@@ -58,7 +61,7 @@ export const useRecipeEmail = () => {
       
       toast({
         title: "Success!",
-        description: "Recipe sent to your email with the AI-generated image!",
+        description: "Recipe sent to your email!",
         variant: "default",
       });
       setEmailSent(true);
