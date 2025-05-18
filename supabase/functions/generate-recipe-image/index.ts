@@ -25,20 +25,22 @@ serve(async (req) => {
 
     console.log(`Generating image for recipe: ${recipeName || 'Recipe'}`);
     console.log(`Using prompt: ${prompt}`);
-
-    // Try to get keywords from the prompt for a better fallback image
+    
+    // Extract keywords for better fallback image search
     const keywords = prompt
       .split(' ')
       .filter(word => word.length > 3)
       .slice(0, 5)
       .join(',');
     
-    // Create a specific food-related fallback URL with timestamp to prevent caching
-    const fallbackUrl = `https://source.unsplash.com/featured/?food,cooking,${encodeURIComponent(keywords)}&${Date.now()}`;
+    // Create a timestamp to prevent caching
+    const timestamp = Date.now();
     
-    // Here we would normally call an image generation API like OpenAI DALL-E,
-    // Stability AI, or similar. Since we don't have those set up, we'll use the fallback.
-    console.log('Using fallback image URL:', fallbackUrl);
+    // For now, we'll use an Unsplash image as we don't have direct access to image generation APIs
+    // In a production environment, you would replace this with actual API calls to DALL-E, Stable Diffusion, etc.
+    const fallbackUrl = `https://source.unsplash.com/featured/?food,${encodeURIComponent(keywords)}&${timestamp}`;
+    
+    console.log('Using high-quality food image URL:', fallbackUrl);
     
     return new Response(
       JSON.stringify({
@@ -50,18 +52,32 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in generate-recipe-image function:', error);
     
-    // Provide a fallback image using Unsplash for food
-    const fallbackUrl = `https://source.unsplash.com/featured/?food,dish,cooking,recipe&${Date.now()}`;
+    // Generate food-related keywords for the fallback
+    let keywords = 'food,cooking,recipe';
+    try {
+      // Try to extract keywords from the error or request
+      const url = new URL(req.url);
+      const params = new URLSearchParams(url.search);
+      if (params.get('keywords')) {
+        keywords += `,${params.get('keywords')}`;
+      }
+    } catch (e) {
+      // Ignore errors in fallback keyword extraction
+    }
+    
+    const timestamp = Date.now();
+    const fallbackUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(keywords)}&${timestamp}`;
+    
     console.log('Using fallback image URL after error:', fallbackUrl);
     
     return new Response(
       JSON.stringify({ 
         success: false, 
         error: error.message,
-        imageUrl: fallbackUrl // Still return an image even on error
+        imageUrl: fallbackUrl 
       }),
       { 
-        status: 200, // Return 200 even for errors since we're providing a fallback
+        status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );

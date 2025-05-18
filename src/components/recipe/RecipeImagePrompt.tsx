@@ -23,17 +23,17 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
         setIsSending(true);
         console.log("Generating image with prompt:", prompt);
         
-        // Create a fallback that will be used if the image generation takes too long
+        // Create a fallback timer to ensure we always get an image
         const fallbackTimer = setTimeout(() => {
           if (!isSent) {
             console.log("Image generation taking too long, using fallback...");
             useFallbackImage();
           }
-        }, 3000);
+        }, 5000); // 5 seconds timeout
         
         setIsGenerating(true);
         
-        // Call the Supabase Edge Function instead of the webhook
+        // Call the Supabase Edge Function
         const { data, error } = await supabase.functions.invoke('generate-recipe-image', {
           body: { 
             prompt: prompt,
@@ -77,12 +77,17 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
     };
     
     const useFallbackImage = () => {
-      // Create a fallback image URL with recipe keywords
-      const keywords = prompt
+      // Create a fallback image URL with recipe keywords from the prompt
+      let keywords = prompt
         .split(' ')
         .filter(word => word.length > 3)
         .slice(0, 5)
         .join(',');
+      
+      // Ensure we have some keywords for the fallback
+      if (!keywords || keywords.length < 3) {
+        keywords = 'food,cooking,recipe,healthy,meal';
+      }
       
       const fallbackUrl = `https://source.unsplash.com/featured/?food,${encodeURIComponent(keywords)}&${Date.now()}`;
       console.log("Using fallback image URL:", fallbackUrl);

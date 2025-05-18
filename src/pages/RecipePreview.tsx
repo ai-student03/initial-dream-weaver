@@ -94,6 +94,9 @@ const RecipePreview = () => {
     );
   }
 
+  // Log the image prompt to help with debugging
+  console.log("Recipe image prompt:", recipe.imagePrompt);
+
   // Prepare the recipe with the correct image URL for the email
   const recipeWithImage = {
     ...recipe,
@@ -144,7 +147,7 @@ const RecipePreview = () => {
           <RecipeIngredients ingredients={recipe.ingredients} />
           <RecipeInstructions instructions={recipe.instructions} />
           
-          {/* Send the image prompt and register the callback to receive the image URL */}
+          {/* Generate image using the prompt from the recipe */}
           {recipe.imagePrompt && (
             <RecipeImagePrompt 
               prompt={recipe.imagePrompt} 
