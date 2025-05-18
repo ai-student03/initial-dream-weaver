@@ -28,13 +28,13 @@ const RecipePreview = () => {
   if (!recipe) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <Card>
+        <Card className="shadow-soft rounded-xl bg-white border border-fime-green/20">
           <CardContent className="pt-6">
             <div className="text-center">
               <p>No recipe data available. Please try again.</p>
               <Button 
                 onClick={() => navigate('/nutrition')}
-                className="mt-4 bg-[#FF6F61] hover:bg-[#ff5d4d]"
+                className="mt-4 bg-fime-green hover:bg-fime-green/90 text-white font-medium rounded-full"
               >
                 Back to Chat
               </Button>
@@ -47,10 +47,10 @@ const RecipePreview = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <Card className="max-w-3xl mx-auto border-[#F8BBD0] shadow-md overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-[#FFDAB9] to-[#F8BBD0] bg-opacity-50 pb-4">
+      <Card className="max-w-3xl mx-auto border-fime-green/20 shadow-soft rounded-xl overflow-hidden">
+        <CardHeader className="bg-gradient-fime pb-4">
           <CardTitle className="text-2xl font-bold text-center text-foreground flex items-center justify-center">
-            <Utensils className="mr-2 h-6 w-6" />
+            <Utensils className="mr-2 h-6 w-6 text-foreground" />
             {recipe.recipeName}
           </CardTitle>
         </CardHeader>
@@ -75,7 +75,7 @@ const RecipePreview = () => {
           />
         </CardContent>
         
-        <CardFooter className="flex justify-center py-6 border-t border-[#F8BBD0] bg-[#FFDAB9] bg-opacity-10">
+        <CardFooter className="flex justify-center py-6 border-t border-fime-green/20 bg-fime-lightGreen">
           <p className="text-center text-sm text-muted-foreground">
             Glad I could help! Come back anytime you need meal inspiration 😊
           </p>

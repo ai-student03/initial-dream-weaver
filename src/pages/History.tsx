@@ -107,22 +107,27 @@ const History = () => {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">Recipe Search History</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center text-foreground">Recipe Search History</h1>
         
         {searches.length === 0 ? (
-          <Card>
+          <Card className="shadow-soft rounded-xl bg-white border border-fime-green/20">
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">You haven't searched for any recipes yet.</p>
-                <Button onClick={() => navigate('/nutrition')}>Find a Recipe</Button>
+                <Button 
+                  onClick={() => navigate('/nutrition')} 
+                  className="bg-fime-green hover:bg-fime-green/90 text-white font-medium rounded-full"
+                >
+                  Find a Recipe
+                </Button>
               </div>
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-4">
             {searches.map((search) => (
-              <Card key={search.id} className="overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-[#FFDAB9] to-[#F8BBD0] bg-opacity-50 pb-4">
+              <Card key={search.id} className="overflow-hidden rounded-xl shadow-soft border border-fime-green/20">
+                <CardHeader className="bg-gradient-fime pb-4">
                   <CardTitle className="text-xl">{search.recipeName}</CardTitle>
                   <CardDescription>
                     <span className="flex items-center gap-1">
@@ -140,14 +145,14 @@ const History = () => {
                   </div>
                   <div className="mb-3">
                     <div className="text-sm font-semibold">Goal:</div>
-                    <div className="px-2 py-1 rounded-full bg-[#F8BBD0] bg-opacity-40 text-sm inline-block">
+                    <div className="px-2 py-1 rounded-full bg-fime-green bg-opacity-20 text-sm inline-block">
                       {search.goal}
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter>
                   <Button 
-                    className="w-full bg-[#FF6F61] hover:bg-[#ff5d4d]" 
+                    className="w-full bg-fime-green hover:bg-fime-green/90 text-white rounded-full" 
                     onClick={() => handleViewRecipe(search)}
                   >
                     <Utensils className="mr-2 h-4 w-4" /> View Recipe
@@ -161,15 +166,15 @@ const History = () => {
       
       {selectedRecipe && (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl shadow-soft-lg bg-white border border-fime-green/20">
             <DialogHeader>
               <DialogTitle className="flex items-center text-2xl">
-                <Utensils className="mr-2 h-6 w-6" /> 
+                <Utensils className="mr-2 h-6 w-6 text-fime-green" /> 
                 {selectedRecipe.recipeDetails.recipeName}
               </DialogTitle>
               <DialogDescription>
                 <div className="flex items-center gap-2 mt-2">
-                  <Clock className="h-4 w-4" /> 
+                  <Clock className="h-4 w-4 text-fime-green" /> 
                   {selectedRecipe.cookingTime} minutes
                 </div>
               </DialogDescription>
@@ -183,7 +188,12 @@ const History = () => {
             </div>
             
             <DialogFooter className="mt-4">
-              <Button onClick={() => setDialogOpen(false)}>Close</Button>
+              <Button 
+                onClick={() => setDialogOpen(false)} 
+                className="bg-fime-green hover:bg-fime-green/90 text-white rounded-full"
+              >
+                Close
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

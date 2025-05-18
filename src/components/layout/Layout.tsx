@@ -6,7 +6,7 @@ import MobileNav from './MobileNav';
 
 const Layout: React.FC = () => {
   return (
-    <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
+    <div className="flex min-h-screen flex-col bg-fime-lightGreen">
       <Navbar />
       <main className="flex-1 pb-16 md:pb-8">
         <Outlet />

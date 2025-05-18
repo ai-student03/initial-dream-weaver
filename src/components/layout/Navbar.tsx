@@ -45,23 +45,23 @@ const Navbar: React.FC = () => {
   }
   
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="border-b border-fime-green/20 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
       <div className="container flex h-14 max-w-screen-2xl items-center">
-        <Link to="/" className="mr-6 flex items-center space-x-2 text-lg font-bold text-primary">
+        <Link to="/" className="mr-6 flex items-center space-x-2 text-lg font-bold text-fime-green">
           <span>FiMe</span>
         </Link>
         
         <nav className="flex-1 flex items-center">
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/" className="text-sm font-medium transition-colors hover:text-primary/50">
+            <Link to="/" className="text-sm font-medium transition-colors hover:text-fime-green">
               Create Recipe
             </Link>
             {user && (
               <>
-                <Link to="/saved-recipes" className="text-sm font-medium transition-colors hover:text-primary/50">
+                <Link to="/saved-recipes" className="text-sm font-medium transition-colors hover:text-fime-green">
                   Saved Recipes
                 </Link>
-                <Link to="/history" className="text-sm font-medium transition-colors hover:text-primary/50">
+                <Link to="/history" className="text-sm font-medium transition-colors hover:text-fime-green">
                   History
                 </Link>
               </>
@@ -70,11 +70,11 @@ const Navbar: React.FC = () => {
           
           <div className="flex-1 flex justify-end">
             {user ? (
-              <Button variant="ghost" onClick={handleSignOut}>
+              <Button variant="outline" onClick={handleSignOut}>
                 Sign Out
               </Button>
             ) : (
-              <Button variant="ghost" onClick={() => navigate('/auth')}>
+              <Button variant="outline" onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
             )}

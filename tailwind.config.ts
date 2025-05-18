@@ -75,7 +75,9 @@ export default {
 					peach: '#FFDAB9',
 					pink: '#F8BBD0',
 					coral: '#FF6F61',
-					green: '#8BC791',
+					green: '#A8E6CF',
+					lightGreen: '#F0FFF5',
+					mintGreen: '#A8E6CF',
 					softGray: '#F1F0FB'
 				}
 			},
@@ -121,7 +123,11 @@ export default {
 			},
 			backgroundImage: {
 				'gradient-soft': 'linear-gradient(to bottom right, #f8fafc, #f1f5f9)',
-				'gradient-fime': 'linear-gradient(to right, #F2FCE2, #FEC6A1)'
+				'gradient-fime': 'linear-gradient(to right, #F0FFF5, #A8E6CF)'
+			},
+			boxShadow: {
+				'soft': '0 4px 12px rgba(0, 0, 0, 0.05)',
+				'soft-lg': '0 10px 25px -3px rgba(0, 0, 0, 0.08)'
 			}
 		}
 	},

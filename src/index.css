@@ -1,5 +1,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,35 +8,35 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 142 100% 98%;  /* #F0FFF5 */
+    --foreground: 155 20% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 155 20% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 155 20% 20%;
 
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 157 60% 78%;  /* #A8E6CF */
+    --primary-foreground: 155 40% 20%;
 
-    --secondary: 262 58% 66%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 158 50% 90%;
+    --secondary-foreground: 155 40% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 158 30% 96%;
+    --muted-foreground: 155 25% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 157 60% 92%;
+    --accent-foreground: 155 40% 25%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221 83% 53%;
+    --border: 157 30% 90%;
+    --input: 157 30% 90%;
+    --ring: 157 60% 78%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
     
     /* FiMe Custom Colors */
     --fime-peach: 34 100% 86%;
@@ -53,10 +54,10 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 157 60% 78%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 262 58% 66%;
+    --secondary: 157 50% 50%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
@@ -70,7 +71,7 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --ring: 157 60% 78%;
   }
 }
 
@@ -80,7 +81,7 @@
   }
 
   body {
-    @apply bg-[#FAFAFA] font-sans text-foreground antialiased;
+    @apply bg-fime-lightGreen font-sans text-foreground antialiased;
     font-family: 'Poppins', sans-serif;
   }
 }
@@ -108,30 +109,30 @@
   
   /* FiMe Custom Classes */
   .chat-bubble-assistant {
-    @apply bg-[#F2FCE2] rounded-2xl rounded-tl-none shadow-sm;
+    @apply bg-fime-lightGreen rounded-2xl rounded-tl-none shadow-sm;
   }
   
   .chat-bubble-user {
-    @apply bg-[#8BC791] text-white rounded-2xl rounded-tr-none shadow-sm;
+    @apply bg-fime-green text-white rounded-2xl rounded-tr-none shadow-sm;
   }
   
   .fime-button {
-    @apply bg-[#8BC791] hover:bg-[#7AB682] text-white rounded-full px-6 py-2 transition-all shadow-sm;
+    @apply bg-fime-green hover:bg-fime-green/90 text-white rounded-full px-6 py-2 transition-all shadow-soft;
   }
   
   .fime-button-outline {
-    @apply border border-[#FEC6A1] hover:border-[#8BC791] text-foreground rounded-full px-6 py-2 transition-all shadow-sm;
+    @apply border border-fime-green hover:bg-fime-green/10 text-foreground rounded-full px-6 py-2 transition-all shadow-sm;
   }
   
   .fime-input {
-    @apply rounded-full border-[#FEC6A1] focus:border-[#8BC791] focus-visible:ring-[#8BC791] shadow-sm;
+    @apply rounded-full border-fime-green/50 focus:border-fime-green focus-visible:ring-fime-green shadow-sm;
   }
   
   .fime-card {
-    @apply border-[#F1F0FB] bg-white rounded-2xl overflow-hidden shadow-md;
+    @apply border-[#F1F0FB] bg-white rounded-2xl overflow-hidden shadow-soft;
   }
   
   .fime-gradient {
-    @apply bg-gradient-to-r from-[#F2FCE2] to-[#F1F0FB];
+    @apply bg-gradient-fime;
   }
 }
