@@ -60,7 +60,7 @@ const History = () => {
             goal: item.goal,
             cookingTime: item.cooking_time,
             recipeName: item.recipe_name,
-            recipeDetails: item.recipe_details,
+            recipeDetails: item.recipe_details as unknown as Recipe,
             createdAt: item.created_at
           }));
           
