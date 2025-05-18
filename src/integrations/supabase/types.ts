@@ -263,6 +263,39 @@ export type Database = {
         }
         Relationships: []
       }
+      searches: {
+        Row: {
+          cooking_time: number
+          created_at: string
+          goal: string
+          id: string
+          ingredients: string
+          recipe_details: Json
+          recipe_name: string
+          user_id: string
+        }
+        Insert: {
+          cooking_time: number
+          created_at?: string
+          goal: string
+          id?: string
+          ingredients: string
+          recipe_details: Json
+          recipe_name: string
+          user_id: string
+        }
+        Update: {
+          cooking_time?: number
+          created_at?: string
+          goal?: string
+          id?: string
+          ingredients?: string
+          recipe_details?: Json
+          recipe_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       session_notes: {
         Row: {
           created_at: string

@@ -32,6 +32,12 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
 
         // Set the recipe data
         setRecipe(data);
+        
+        // Save the search to history if user is authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await saveSearchToHistory(formData, data);
+        }
       } catch (error) {
         console.error('Error generating recipe:', error);
         toast({
@@ -46,6 +52,25 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
 
     generateRecipe();
   }, [formData, navigate]);
+
+  const saveSearchToHistory = async (formData: RecipeFormData, recipeData: Recipe) => {
+    try {
+      const { error } = await supabase
+        .from('searches')
+        .insert({
+          ingredients: formData.ingredients,
+          goal: formData.goals.join(', '),
+          cooking_time: formData.cookingTime,
+          recipe_name: recipeData.recipeName,
+          recipe_details: recipeData
+        });
+        
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving search history:', error);
+      // We don't show a toast here to avoid disrupting the user experience
+    }
+  };
 
   const handleSaveRecipe = () => {
     if (recipe) {

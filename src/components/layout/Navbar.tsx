@@ -57,9 +57,14 @@ const Navbar: React.FC = () => {
               Create Recipe
             </Link>
             {user && (
-              <Link to="/saved-recipes" className="text-sm font-medium transition-colors hover:text-primary/50">
-                Saved Recipes
-              </Link>
+              <>
+                <Link to="/saved-recipes" className="text-sm font-medium transition-colors hover:text-primary/50">
+                  Saved Recipes
+                </Link>
+                <Link to="/history" className="text-sm font-medium transition-colors hover:text-primary/50">
+                  History
+                </Link>
+              </>
             )}
           </div>
           

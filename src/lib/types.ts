@@ -57,3 +57,13 @@ export type Task = {
   priority: Priority;
   tags: Tag[];
 };
+
+export type SearchHistory = {
+  id: string;
+  ingredients: string;
+  goal: string;
+  cookingTime: number;
+  recipeName: string;
+  recipeDetails: Recipe;
+  createdAt: string;
+};
