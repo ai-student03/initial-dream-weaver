@@ -26,7 +26,6 @@ serve(async (req) => {
 
     // Log email sending details for debugging
     console.log(`Sending recipe "${recipe.recipeName}" to ${email}`);
-    console.log(`Recipe image URL: ${recipe.imageUrl}`);
     
     // Initialize the Resend client with the API key
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
@@ -36,7 +35,7 @@ serve(async (req) => {
       throw new Error('RESEND_API_KEY environment variable is not set');
     }
 
-    // Generate HTML for the email with the AI-generated image
+    // Generate HTML for the email
     const emailHtml = generateEmailHtml(recipe);
     
     // Send the email using Resend
@@ -69,11 +68,6 @@ serve(async (req) => {
 
 // Helper function to generate HTML for the email
 function generateEmailHtml(recipe) {
-  // Add a timestamp to the image URL to prevent caching
-  let imageUrl = recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking';
-  
-  console.log(`Using image URL in email HTML: ${imageUrl}`);
-  
   return `
     <!DOCTYPE html>
     <html>
@@ -84,7 +78,6 @@ function generateEmailHtml(recipe) {
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
         h1, h2, h3 { color: #FF6F61; }
         .header { text-align: center; margin-bottom: 30px; }
-        .recipe-image { width: 100%; max-height: 300px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; }
         .nutrition { display: flex; justify-content: space-between; background-color: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
         .nutrition div { text-align: center; }
         .nutrition span { display: block; font-weight: bold; font-size: 18px; }
@@ -93,7 +86,6 @@ function generateEmailHtml(recipe) {
         .ingredients { padding-left: 20px; }
         .ingredients li { margin-bottom: 5px; }
         .instructions { white-space: pre-wrap; }
-        .image-prompt { background-color: #f9f9f9; padding: 15px; border-radius: 10px; font-style: italic; margin-bottom: 20px; }
         .footer { text-align: center; font-size: 14px; color: #777; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
       </style>
     </head>
@@ -101,16 +93,6 @@ function generateEmailHtml(recipe) {
       <div class="header">
         <h1>FiMe Recipe</h1>
         <h2>${recipe.recipeName}</h2>
-      </div>
-      
-      <div style="text-align: center;">
-        <img 
-          src="${imageUrl}" 
-          alt="${recipe.recipeName}" 
-          class="recipe-image" 
-          style="max-width: 100%; height: auto; border-radius: 10px; margin-bottom: 20px;"
-          onerror="this.onerror=null; this.src='https://source.unsplash.com/featured/?food,cooking'" 
-        />
       </div>
       
       <div class="nutrition">

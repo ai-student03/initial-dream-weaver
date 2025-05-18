@@ -27,14 +27,13 @@ serve(async (req) => {
 
     // Create a prompt for GPT with the updated format that requests a JSON response
     const prompt = `
-      Act as a professional nutritionist and food stylist.
+      Act as a professional nutritionist.
       
       The user has the following ingredients: ${ingredients}  
       Their goal is: ${goals.join(', ')}  
       They have ${cookingTime} minutes to cook.
       
-      Generate one realistic, tasty and healthy recipe that fits these inputs.  
-      Also, write a detailed and vivid prompt to generate an image of the dish using an AI image generator.
+      Generate one realistic, tasty and healthy recipe that fits these inputs.
       
       Respond in this exact JSON format:
       {
@@ -44,8 +43,7 @@ serve(async (req) => {
         "protein": number,
         "carbs": number, 
         "fat": number,
-        "calories": number,
-        "image_prompt": "a modern, healthy-looking dish with ..., top view, natural light, minimal styling"
+        "calories": number
       }
       
       ⚠️ Do NOT use all ingredients if they do not naturally go well together.  
@@ -103,45 +101,8 @@ serve(async (req) => {
         protein: extractNutritionValue(content, 'protein'),
         carbs: extractNutritionValue(content, 'carbs'),
         fat: extractNutritionValue(content, 'fat'),
-        calories: extractNutritionValue(content, 'calories'),
-        image_prompt: extractImagePrompt(content)
+        calories: extractNutritionValue(content, 'calories')
       };
-    }
-
-    // Generate AI image using the FAL edge function
-    const imagePrompt = recipeData.image_prompt || "";
-    const recipeName = recipeData.recipe_name || recipeData.recipeName || "Healthy Recipe";
-    
-    console.log("Calling FAL image generation with prompt:", imagePrompt);
-    
-    // Call our image generation edge function
-    const imageResponse = await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/generate-recipe-image', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        prompt: imagePrompt,
-        recipeName: recipeName
-      })
-    });
-    
-    let imageUrl;
-    
-    if (imageResponse.ok) {
-      const imageData = await imageResponse.json();
-      imageUrl = imageData.imageUrl;
-      console.log("Successfully generated image:", imageUrl);
-    } else {
-      console.error("Failed to generate image, using fallback Unsplash image");
-      // Fallback to Unsplash if FAL generation fails
-      const cleanRecipeName = recipeName.toLowerCase()
-        .replace(/[^\w\s]/g, '')  // Remove special characters
-        .replace(/\s+/g, ',');    // Replace spaces with commas
-        
-      // Generate a high-quality food image URL
-      imageUrl = `https://source.unsplash.com/featured/800x600/?food,${encodeURIComponent(cleanRecipeName)},dish,healthy`;
     }
     
     // Standardize the response format
@@ -153,8 +114,6 @@ serve(async (req) => {
       carbs: recipeData.carbs,
       fat: recipeData.fat,
       calories: recipeData.calories,
-      imageUrl,
-      imagePrompt: recipeData.image_prompt || "",
       cookingTime,
       goals,
       isFavorited: false
@@ -207,11 +166,4 @@ function extractNutritionValue(text, nutrientType) {
   const regex = new RegExp(`${nutrientType}:?\\s*(\\d+)`, 'i');
   const match = text.match(regex);
   return match ? parseInt(match[1], 10) : Math.floor(Math.random() * 30) + 10;
-}
-
-function extractImagePrompt(text) {
-  const promptSection = text.match(/(?:image prompt|image description|prompt):?.*?\n?(.*?)(?:\n\s*\n|$)/i);
-  if (!promptSection) return "Healthy, appetizing dish, professional food photography, bright natural lighting, fresh ingredients, styled plating";
-  
-  return promptSection[1].trim();
 }

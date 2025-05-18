@@ -27,8 +27,6 @@ export type Recipe = {
   calories: number;
   cookingTime: number;
   goals: string[];
-  imageUrl?: string;
-  imagePrompt?: string;
   isFavorited: boolean;
   createdAt?: Date;
 };

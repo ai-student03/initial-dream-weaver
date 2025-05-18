@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,8 @@ import RecipeIngredients from '@/components/recipe/RecipeIngredients';
 import RecipeInstructions from '@/components/recipe/RecipeInstructions';
 import RecipeEmailPrompt from '@/components/recipe/RecipeEmailPrompt';
 import RecipeLoadingState from '@/components/recipe/RecipeLoadingState';
-import RecipeImagePrompt from '@/components/recipe/RecipeImagePrompt';
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration';
 import { useRecipeEmail } from '@/hooks/useRecipeEmail';
-import { toast } from '@/hooks/use-toast';
 
 const RecipePreview = () => {
   const location = useLocation();
@@ -22,53 +20,6 @@ const RecipePreview = () => {
   const formData = location.state?.formData as RecipeFormData;
   const { recipe, loading, handleSaveRecipe } = useRecipeGeneration(formData);
   const { emailLoading, emailSent, sendRecipeEmail } = useRecipeEmail();
-  const [aiGeneratedImageUrl, setAiGeneratedImageUrl] = useState<string | null>(null);
-  const [imageError, setImageError] = useState(false);
-
-  const handleImageReceived = (imageUrl: string) => {
-    console.log("AI-generated image received in RecipePreview:", imageUrl);
-    
-    try {
-      // Basic URL validation
-      if (!imageUrl.startsWith('http')) {
-        throw new Error('Invalid URL format');
-      }
-      
-      setAiGeneratedImageUrl(imageUrl);
-      setImageError(false);
-      
-      // Update the recipe object with the new image URL
-      if (recipe) {
-        recipe.imageUrl = imageUrl;
-        console.log("Updated recipe with new image URL:", imageUrl);
-      }
-    } catch (error) {
-      console.error("Invalid image URL received:", error);
-      setImageError(true);
-      toast({
-        title: "Image Error",
-        description: "Received an invalid image URL. Using fallback image instead.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleImageError = () => {
-    console.log("Image failed to load, using fallback");
-    setImageError(true);
-    
-    // Generate a fallback URL based on recipe name
-    const keywords = recipe?.recipeName.replace(/\s+/g, ',') || 'food,recipe';
-    const fallbackUrl = `https://source.unsplash.com/featured/?food,${keywords}&${Date.now()}`;
-    
-    // Update the recipe with the fallback URL
-    if (recipe) {
-      recipe.imageUrl = fallbackUrl;
-    }
-    
-    // Update state with the fallback
-    setAiGeneratedImageUrl(fallbackUrl);
-  };
 
   if (loading) {
     return <RecipeLoadingState />;
@@ -94,15 +45,6 @@ const RecipePreview = () => {
     );
   }
 
-  // Log the image prompt to help with debugging
-  console.log("Recipe image prompt:", recipe.imagePrompt);
-
-  // Prepare the recipe with the correct image URL for the email
-  const recipeWithImage = {
-    ...recipe,
-    imageUrl: aiGeneratedImageUrl || recipe.imageUrl
-  };
-
   return (
     <div className="container mx-auto py-8 px-4">
       <Card className="max-w-3xl mx-auto border-[#F8BBD0] shadow-md overflow-hidden">
@@ -114,28 +56,6 @@ const RecipePreview = () => {
         </CardHeader>
         
         <CardContent className="pt-6 space-y-6">
-          {(aiGeneratedImageUrl || recipe.imageUrl) && (
-            <div className="flex flex-col items-center mb-6">
-              <div className="relative w-full max-w-md h-64 overflow-hidden rounded-xl shadow-sm">
-                <img 
-                  src={aiGeneratedImageUrl || recipe.imageUrl} 
-                  alt={recipe.recipeName} 
-                  className="w-full h-full object-cover"
-                  onError={handleImageError}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {imageError
-                  ? 'Using a stock photo for your recipe'
-                  : aiGeneratedImageUrl 
-                    ? 'AI-generated image based on your ingredients' 
-                    : recipe.imageUrl.includes('unsplash.com') 
-                      ? 'Using a stock photo (AI image generation in progress)' 
-                      : 'AI-generated image based on your ingredients'}
-              </p>
-            </div>
-          )}
-          
           <RecipeNutritionInfo recipe={recipe} />
           
           <div>
@@ -147,17 +67,9 @@ const RecipePreview = () => {
           <RecipeIngredients ingredients={recipe.ingredients} />
           <RecipeInstructions instructions={recipe.instructions} />
           
-          {/* Generate image using the prompt from the recipe */}
-          {recipe.imagePrompt && (
-            <RecipeImagePrompt 
-              prompt={recipe.imagePrompt} 
-              onImageReceived={handleImageReceived} 
-            />
-          )}
-          
           <RecipeEmailPrompt 
-            recipe={recipeWithImage}
-            onSendEmail={() => sendRecipeEmail(recipeWithImage)} 
+            recipe={recipe}
+            onSendEmail={() => sendRecipeEmail(recipe)} 
             emailLoading={emailLoading} 
             emailSent={emailSent} 
           />
