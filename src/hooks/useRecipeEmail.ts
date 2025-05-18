@@ -23,6 +23,11 @@ export const useRecipeEmail = () => {
       }
       
       // Ensure imageUrl is defined and properly formatted
+      const imageUrl = recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking';
+      
+      console.log("Sending recipe email with data:", recipe);
+      console.log("Image URL being sent:", imageUrl);
+      
       const recipeData = {
         recipeName: recipe.recipeName,
         ingredients: recipe.ingredients,
@@ -33,11 +38,8 @@ export const useRecipeEmail = () => {
         calories: recipe.calories,
         cookingTime: recipe.cookingTime,
         goals: recipe.goals,
-        imageUrl: recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking' // Always provide an image URL
+        imageUrl: imageUrl // Explicitly set this to ensure it's included
       };
-      
-      console.log("Sending recipe email with data:", recipeData);
-      console.log("Image URL being sent:", recipeData.imageUrl);
       
       // Call the send-recipe-email function
       const { data, error } = await supabase.functions.invoke('send-recipe-email', {

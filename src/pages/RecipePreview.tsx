@@ -57,6 +57,12 @@ const RecipePreview = () => {
     );
   }
 
+  // Prepare the recipe with the correct image URL for the email
+  const recipeWithImage = {
+    ...recipe,
+    imageUrl: aiGeneratedImageUrl || recipe.imageUrl
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <Card className="max-w-3xl mx-auto border-[#F8BBD0] shadow-md overflow-hidden">
@@ -109,8 +115,8 @@ const RecipePreview = () => {
           )}
           
           <RecipeEmailPrompt 
-            recipe={{...recipe, imageUrl: aiGeneratedImageUrl || recipe.imageUrl}}
-            onSendEmail={() => sendRecipeEmail({...recipe, imageUrl: aiGeneratedImageUrl || recipe.imageUrl})} 
+            recipe={recipeWithImage}
+            onSendEmail={() => sendRecipeEmail(recipeWithImage)} 
             emailLoading={emailLoading} 
             emailSent={emailSent} 
           />

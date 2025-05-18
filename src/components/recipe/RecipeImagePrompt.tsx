@@ -33,7 +33,11 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
           }),
         });
         
-        console.log("Webhook request sent");
+        if (!response.ok) {
+          throw new Error(`Webhook responded with status: ${response.status}`);
+        }
+        
+        console.log("Webhook request sent successfully");
         setIsSent(true);
         
         // Set up event listener for the webhook response
@@ -46,6 +50,10 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
             
             if (data.imageUrl) {
               console.log("Image URL received:", data.imageUrl);
+              
+              // Verify the URL format before proceeding
+              const url = new URL(data.imageUrl);
+              console.log("Validated image URL:", url.toString());
               
               // Call the callback function with the image URL
               if (onImageReceived) {

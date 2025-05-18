@@ -101,7 +101,7 @@ function generateEmailHtml(recipe) {
         <h2>${recipe.recipeName}</h2>
       </div>
       
-      <img src="${imageUrl}" alt="${recipe.recipeName}" class="recipe-image">
+      <img src="${imageUrl}" alt="${recipe.recipeName}" class="recipe-image" />
       
       <div class="nutrition">
         <div>
