@@ -22,8 +22,13 @@ export const useRecipeEmail = () => {
         return;
       }
       
-      // Ensure imageUrl is defined and properly formatted
-      const imageUrl = recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking';
+      // Ensure imageUrl is defined and properly formatted - add a timestamp to prevent caching
+      let imageUrl = recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking';
+      
+      // Add a timestamp parameter to Unsplash URLs to prevent caching issues
+      if (imageUrl.includes('unsplash.com') && !imageUrl.includes('&t=')) {
+        imageUrl = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+      }
       
       console.log("Sending recipe email with data:", recipe);
       console.log("Image URL being sent:", imageUrl);

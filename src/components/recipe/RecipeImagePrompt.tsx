@@ -12,6 +12,7 @@ interface RecipeImagePromptProps {
 const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) => {
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [isEventSourceActive, setIsEventSourceActive] = useState(false);
   const webhookUrl = 'https://hook.eu2.make.com/uaqgnkl0rayez59wide2zfemmipykhie';
   
   useEffect(() => {
@@ -41,7 +42,11 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
         setIsSent(true);
         
         // Set up event listener for the webhook response
-        const eventSource = new EventSource(`${webhookUrl}/listen`);
+        const eventSourceUrl = `${webhookUrl}/listen`;
+        console.log("Setting up EventSource at:", eventSourceUrl);
+        
+        const eventSource = new EventSource(eventSourceUrl);
+        setIsEventSourceActive(true);
         
         eventSource.onmessage = (event) => {
           try {
@@ -51,23 +56,45 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
             if (data.imageUrl) {
               console.log("Image URL received:", data.imageUrl);
               
-              // Verify the URL format before proceeding
-              const url = new URL(data.imageUrl);
-              console.log("Validated image URL:", url.toString());
-              
-              // Call the callback function with the image URL
-              if (onImageReceived) {
-                onImageReceived(data.imageUrl);
+              // Verify the URL format and make sure it's using HTTPS
+              try {
+                let urlToUse = data.imageUrl;
+                // If the URL doesn't start with http, add https://
+                if (!urlToUse.startsWith('http')) {
+                  urlToUse = 'https://' + urlToUse;
+                }
+                // If using HTTP, change to HTTPS
+                if (urlToUse.startsWith('http://')) {
+                  urlToUse = urlToUse.replace('http://', 'https://');
+                }
+                
+                const url = new URL(urlToUse);
+                console.log("Validated image URL:", url.toString());
+                
+                // Call the callback function with the validated image URL
+                if (onImageReceived) {
+                  onImageReceived(url.toString());
+                }
+                
+                toast({
+                  title: "Image received!",
+                  description: "The AI-generated image for your recipe is ready.",
+                  variant: "default",
+                });
+              } catch (urlError) {
+                console.error("Invalid URL format:", urlError);
+                // Use a fallback image
+                const fallbackUrl = `https://source.unsplash.com/featured/?food,cooking,${prompt.replace(/\s+/g, ',')}`;
+                console.log("Using fallback image URL due to format error:", fallbackUrl);
+                
+                if (onImageReceived) {
+                  onImageReceived(fallbackUrl);
+                }
               }
-              
-              toast({
-                title: "Image received!",
-                description: "The AI-generated image for your recipe is ready.",
-                variant: "default",
-              });
               
               // Close the event source
               eventSource.close();
+              setIsEventSourceActive(false);
             }
           } catch (err) {
             console.error("Error parsing webhook response:", err);
@@ -77,6 +104,15 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
         eventSource.onerror = (err) => {
           console.error("EventSource error:", err);
           eventSource.close();
+          setIsEventSourceActive(false);
+          
+          // If there's an error with the EventSource, use fallback image
+          const fallbackUrl = `https://source.unsplash.com/featured/?food,cooking,${prompt.replace(/\s+/g, ',')}`;
+          console.log("Using fallback image URL due to EventSource error:", fallbackUrl);
+          
+          if (onImageReceived) {
+            onImageReceived(fallbackUrl);
+          }
         };
         
         // Set a timeout to close the event source after 30 seconds
@@ -84,8 +120,17 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
           if (eventSource.readyState !== 2) { // 2 means CLOSED
             console.log("Closing event source after timeout");
             eventSource.close();
+            setIsEventSourceActive(false);
+            
+            // Provide fallback image after timeout
+            const fallbackUrl = `https://source.unsplash.com/featured/?food,cooking,${prompt.replace(/\s+/g, ',')}`;
+            console.log("Using fallback image URL due to timeout:", fallbackUrl);
+            
+            if (onImageReceived) {
+              onImageReceived(fallbackUrl);
+            }
           }
-        }, 30000);
+        }, 20000); // 20 seconds timeout
         
         toast({
           title: "Image prompt sent!",
@@ -99,6 +144,14 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
           description: "Failed to send the image prompt to the service.",
           variant: "destructive",
         });
+        
+        // Provide fallback image on error
+        const fallbackUrl = `https://source.unsplash.com/featured/?food,cooking,${prompt.replace(/\s+/g, ',')}`;
+        console.log("Using fallback image URL due to webhook error:", fallbackUrl);
+        
+        if (onImageReceived) {
+          onImageReceived(fallbackUrl);
+        }
       } finally {
         setIsSending(false);
       }
@@ -119,6 +172,11 @@ const RecipeImagePrompt = ({ prompt, onImageReceived }: RecipeImagePromptProps) 
             <div className="flex flex-col items-center">
               <Loader className="h-5 w-5 animate-spin text-[#FF6F61] mb-2" />
               <p className="text-sm text-muted-foreground">Sending image prompt to generation service...</p>
+            </div>
+          ) : isEventSourceActive ? (
+            <div className="flex flex-col items-center">
+              <Loader className="h-5 w-5 animate-spin text-[#FF6F61] mb-2" />
+              <p className="text-sm text-muted-foreground">Waiting for AI-generated image...</p>
             </div>
           ) : isSent ? (
             <p className="text-sm text-muted-foreground">Image prompt sent! Waiting for the generated image...</p>

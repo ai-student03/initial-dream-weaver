@@ -14,6 +14,7 @@ import RecipeLoadingState from '@/components/recipe/RecipeLoadingState';
 import RecipeImagePrompt from '@/components/recipe/RecipeImagePrompt';
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration';
 import { useRecipeEmail } from '@/hooks/useRecipeEmail';
+import { toast } from '@/hooks/use-toast';
 
 const RecipePreview = () => {
   const location = useLocation();
@@ -25,11 +26,25 @@ const RecipePreview = () => {
 
   const handleImageReceived = (imageUrl: string) => {
     console.log("AI-generated image received in RecipePreview:", imageUrl);
-    setAiGeneratedImageUrl(imageUrl);
     
-    // Update the recipe object with the new image URL
-    if (recipe) {
-      recipe.imageUrl = imageUrl;
+    try {
+      // Validate URL
+      new URL(imageUrl);
+      
+      setAiGeneratedImageUrl(imageUrl);
+      
+      // Update the recipe object with the new image URL
+      if (recipe) {
+        recipe.imageUrl = imageUrl;
+        console.log("Updated recipe with new image URL:", imageUrl);
+      }
+    } catch (error) {
+      console.error("Invalid image URL received:", error);
+      toast({
+        title: "Image Error",
+        description: "Received an invalid image URL. Using fallback image instead.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -76,15 +91,19 @@ const RecipePreview = () => {
         <CardContent className="pt-6 space-y-6">
           {(aiGeneratedImageUrl || recipe.imageUrl) && (
             <div className="flex flex-col items-center mb-6">
-              <img 
-                src={aiGeneratedImageUrl || recipe.imageUrl} 
-                alt={recipe.recipeName} 
-                className="rounded-xl max-h-64 object-cover shadow-sm"
-                onError={(e) => {
-                  console.error('Image failed to load:', e);
-                  e.currentTarget.src = 'https://source.unsplash.com/featured/?food,cooking';
-                }}
-              />
+              <div className="relative w-full max-w-md h-64 overflow-hidden rounded-xl shadow-sm">
+                <img 
+                  src={aiGeneratedImageUrl || recipe.imageUrl} 
+                  alt={recipe.recipeName} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error('Image failed to load:', e);
+                    // Provide a more specific food-related fallback image
+                    const fallbackUrl = `https://source.unsplash.com/featured/?food,${recipe.recipeName.replace(/\s+/g, ',')}&${Date.now()}`;
+                    e.currentTarget.src = fallbackUrl;
+                  }}
+                />
+              </div>
               <p className="text-xs text-muted-foreground mt-2">
                 {aiGeneratedImageUrl 
                   ? 'AI-generated image based on your ingredients' 

@@ -69,8 +69,13 @@ serve(async (req) => {
 
 // Helper function to generate HTML for the email
 function generateEmailHtml(recipe) {
-  // Ensure we have an image URL, using a placeholder if not available
-  const imageUrl = recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking';
+  // Add a timestamp to the image URL to prevent caching
+  let imageUrl = recipe.imageUrl || 'https://source.unsplash.com/featured/?food,cooking';
+  
+  // Add a timestamp parameter to prevent caching
+  if (imageUrl.includes('unsplash.com') && !imageUrl.includes('&t=')) {
+    imageUrl = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+  }
   
   console.log(`Using image URL in email HTML: ${imageUrl}`);
   
@@ -78,6 +83,8 @@ function generateEmailHtml(recipe) {
     <!DOCTYPE html>
     <html>
     <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
         h1, h2, h3 { color: #FF6F61; }
@@ -93,6 +100,7 @@ function generateEmailHtml(recipe) {
         .instructions { white-space: pre-wrap; }
         .image-prompt { background-color: #f9f9f9; padding: 15px; border-radius: 10px; font-style: italic; margin-bottom: 20px; }
         .footer { text-align: center; font-size: 14px; color: #777; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
+        .fallback-text { text-align: center; color: #777; padding: 40px 20px; border: 1px dashed #ccc; margin-bottom: 20px; }
       </style>
     </head>
     <body>
@@ -101,7 +109,7 @@ function generateEmailHtml(recipe) {
         <h2>${recipe.recipeName}</h2>
       </div>
       
-      <img src="${imageUrl}" alt="${recipe.recipeName}" class="recipe-image" />
+      <img src="${imageUrl}" alt="${recipe.recipeName}" class="recipe-image" onerror="this.onerror=null; this.src='https://source.unsplash.com/featured/?food,cooking'; this.parentNode.insertAdjacentHTML('afterend', '<p style=\'text-align:center; color:#777; font-size:12px;\'>The original image could not be displayed. A fallback image is shown.</p>');" />
       
       <div class="nutrition">
         <div>
