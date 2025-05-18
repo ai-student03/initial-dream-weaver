@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 export const useRecipeGeneration = (formData: RecipeFormData | null) => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [regenerationCount, setRegenerationCount] = useState(0);
   const navigate = useNavigate();
 
@@ -20,6 +21,16 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
 
       try {
         setLoading(true);
+        setError(null);
+        
+        console.log("Calling generate-recipe with:", {
+          ingredients: formData.ingredients,
+          goals: formData.goals,
+          cookingTime: formData.cookingTime,
+          regenerationCount,
+          differentIdea: regenerationCount > 0
+        });
+        
         // Call the Supabase Edge Function to generate a recipe
         const { data, error } = await supabase.functions.invoke('generate-recipe', {
           body: {
@@ -31,9 +42,18 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Edge function error:", error);
+          throw new Error(`Edge function error: ${error.message}`);
+        }
+
+        if (data.error) {
+          console.error("Recipe generation error:", data.error);
+          throw new Error(data.error);
+        }
 
         // Set the recipe data
+        console.log("Recipe generated successfully:", data);
         setRecipe(data);
         
         // Save the search to history if user is authenticated
@@ -43,9 +63,10 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
         }
       } catch (error) {
         console.error('Error generating recipe:', error);
+        setError(error instanceof Error ? error.message : "Unknown error");
         toast({
           title: "Error",
-          description: "Failed to generate a recipe. Please try again.",
+          description: `Failed to generate a recipe: ${error instanceof Error ? error.message : "Please try again"}`,
           variant: "destructive",
         });
       } finally {
@@ -99,5 +120,5 @@ export const useRecipeGeneration = (formData: RecipeFormData | null) => {
     setRegenerationCount(prevCount => prevCount + 1);
   };
 
-  return { recipe, loading, handleSaveRecipe, handleRegenerateRecipe };
+  return { recipe, loading, error, handleSaveRecipe, handleRegenerateRecipe };
 };

@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.2.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,10 +24,14 @@ serve(async (req) => {
       );
     }
 
-    const configuration = new Configuration({
-      apiKey: Deno.env.get("OPENAI_API_KEY"),
-    });
-    const openai = new OpenAIApi(configuration);
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiApiKey) {
+      console.error("OPENAI_API_KEY is not set in environment variables");
+      return new Response(
+        JSON.stringify({ error: "OpenAI API key is not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Construct our prompt
     let prompt = `Act as a professional nutritionist. Based on:
@@ -47,24 +50,42 @@ Suggest one healthy and satisfying meal that matches the user's goal. Include:
       prompt += "\n\nGive a different idea than before.";
     }
 
-    const response = await openai.createChatCompletion({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: "You are a professional nutritionist who specializes in creating healthy recipes."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 1000,
+    // Make direct fetch request to OpenAI API instead of using the client library
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${openaiApiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o", // Using the most recent model
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional nutritionist who specializes in creating healthy recipes."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000,
+      }),
     });
 
-    // Parse the AI response to extract recipe information
-    const aiResponse = response.data.choices[0].message?.content || "";
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("OpenAI API error:", JSON.stringify(errorData));
+      return new Response(
+        JSON.stringify({ error: `OpenAI API error: ${errorData.error?.message || "Unknown error"}` }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const data = await response.json();
+    const aiResponse = data.choices[0].message?.content || "";
+    console.log("AI Response:", aiResponse);
     
     // Use a regex pattern to extract the dish name (first line or line after any separator)
     const dishNamePattern = /(?:^|\n\n)(?:Dish name:|#|\*\*|)?\s*([^\n]+)/i;
@@ -137,7 +158,7 @@ Suggest one healthy and satisfying meal that matches the user's goal. Include:
       carbs: carbs,
       fat: fat,
       calories: calories,
-      cookingTime: parseInt(cookingTime),
+      cookingTime: parseInt(cookingTime.toString()),
       goals: goals,
       isFavorited: false
     };
@@ -149,7 +170,7 @@ Suggest one healthy and satisfying meal that matches the user's goal. Include:
     console.error("Error generating recipe:", error);
     
     return new Response(
-      JSON.stringify({ error: "Failed to generate recipe" }),
+      JSON.stringify({ error: `Failed to generate recipe: ${error.message}` }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
