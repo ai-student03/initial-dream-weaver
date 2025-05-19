@@ -39,7 +39,7 @@ serve(async (req) => {
     const prompt = buildPrompt(ingredients, goals, cookingTime, differentIdea);
 
     try {
-      // Get AI response
+      // Get AI response using the Assistants API
       const aiResponse = await generateRecipeFromOpenAI(prompt, openaiApiKey, differentIdea);
       
       // Parse recipe from AI response
