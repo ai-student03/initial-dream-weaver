@@ -85,19 +85,20 @@ Nutritional Information (estimated):
 
     console.log("Calling OpenAI with prompt:", prompt.substring(0, 100) + "...");
 
-    // Make direct fetch request to OpenAI API
+    // Make request to OpenAI API with the FiMe Recipe Expert agent
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${openaiApiKey}`,
+        "OpenAI-Beta": "assistants=v1"  // Enable assistants API
       },
       body: JSON.stringify({
         model: "gpt-4o", // Using GPT-4o for better recipe generation
         messages: [
           {
             role: "system",
-            content: "You are a professional nutritionist who specializes in creating healthy recipes with accurate nutritional information."
+            content: "You are FiMe Recipe Expert, a professional nutritionist who specializes in creating healthy recipes with accurate nutritional information."
           },
           {
             role: "user",
