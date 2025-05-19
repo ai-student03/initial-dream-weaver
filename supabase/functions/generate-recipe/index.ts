@@ -36,44 +36,47 @@ serve(async (req) => {
     // Construct improved prompt
     let prompt = `Act as a professional nutritionist and recipe developer.
 
-The user has provided:
-- Ingredients: ${ingredients}  
-- Goal: ${goals.join(", ")}  
-- Cooking time: ${cookingTime} minutes
+The user has the following:
+Ingredients: ${ingredients}  
+Goal: ${goals.join(", ")}  
+Cooking time: ${cookingTime} minutes
 
 Your task:
-1. Suggest **one healthy and satisfying recipe** that fits the user's goal and available time.
-2. Use only ingredients that logically go well together. It is not necessary to use all the ingredients.
-3. Be creative: you may use only parts of an ingredient (e.g., egg yolk or white).
-4. Treat each ingredient individually — not as a fixed bundle.
-5. If this is a follow-up request (like "Give me another idea"), make sure the recipe is **clearly different** from the previous one (change the dish style, structure, or cooking method).
+1. Suggest one realistic, healthy, and satisfying recipe that fits the goal and can be made in the available time.
+2. Use only ingredients that logically go well together — you do not need to use all of them.
+3. Be creative: e.g., you can use just the yolk or just the white of an egg.
+4. Each ingredient should be considered individually.
+5. If this is a follow-up request, generate a completely different dish.
+6. Make sure the instructions are clear, numbered, and easy to follow.
+7. Estimate nutritional values as accurately as possible based on the ingredients used.
 
-Make sure all recipe instructions are **clear, numbered, and easy to follow**.
-
-✅ Most importantly:
-- **Verify that the quantities and nutritional values you provide are reasonable and accurate.**
-- Ensure the calorie, protein, carb, and fat estimations reflect the ingredients and their amounts realistically.
-- If unsure, give rounded estimates and state that they are approximate.
+❗ Important:
+- **Always include a recipe name.**
+- **Always include preparation steps.**
+- **Always include nutritional values.**
 
 ---
 
-📦 Format your response like this:
+🧾 Format your answer like this:
 
-**Recipe Name**
+Recipe Name:  
+[Insert name here]
 
-**Ingredients**  
-(List each with quantities, e.g.: 2 eggs, 1 slice whole grain bread, 1 tbsp tahini)
+Ingredients:  
+- [ingredient 1]  
+- [ingredient 2]  
+...
 
-**Preparation Instructions**  
-1. Step one...  
-2. Step two...  
-3. Etc.
+Instructions:  
+1. [Step one]  
+2. [Step two]  
+...
 
-**Nutritional Information (estimated)**  
-Protein: ~X g  
-Carbs: ~X g  
-Fat: ~X g  
-Calories: ~X`;
+Nutritional Information (estimated):  
+- Protein: ~Xg  
+- Carbs: ~Xg  
+- Fat: ~Xg  
+- Calories: ~X`;
 
     // Add differentIdea flag instruction if this is a regeneration request
     if (differentIdea) {
@@ -119,14 +122,14 @@ Calories: ~X`;
     const aiResponse = data.choices[0].message?.content || "";
     console.log("AI Response:", aiResponse);
     
-    // Fixed regex patterns with proper escaping of special characters
-    const dishNamePattern = /(?:\*\*Recipe Name\*\*|\*\*Recipe Name)[\r\n\s]*([^\r\n]+)/i;
-    const dishNameMatch = aiResponse.match(dishNamePattern);
-    const dishName = dishNameMatch ? dishNameMatch[1].replace(/:/g, "").trim() : "Healthy Recipe";
+    // Extract recipe name
+    const recipeNameRegex = /Recipe Name:\s*\n([^\n]+)/;
+    const recipeNameMatch = aiResponse.match(recipeNameRegex);
+    const recipeName = recipeNameMatch ? recipeNameMatch[1].trim() : "Healthy Recipe";
     
     // Extract ingredients
-    const ingredientsPattern = /(?:\*\*Ingredients\*\*|\*\*Ingredients)[\r\n\s]+([\s\S]*?)(?=\s*\*\*|\s*---|\s*$)/i;
-    const ingredientsMatch = aiResponse.match(ingredientsPattern);
+    const ingredientsRegex = /Ingredients:\s*\n([\s\S]*?)(?=\n\s*Instructions:|$)/;
+    const ingredientsMatch = aiResponse.match(ingredientsRegex);
     let ingredientList: string[] = [];
     
     if (ingredientsMatch && ingredientsMatch[1]) {
@@ -137,8 +140,8 @@ Calories: ~X`;
     }
     
     // Extract instructions
-    const instructionsPattern = /(?:\*\*Preparation Instructions\*\*|\*\*Instructions|\*\*Preparation)[\r\n\s]+([\s\S]*?)(?=\s*\*\*|\s*---|\s*$)/i;
-    const instructionsMatch = aiResponse.match(instructionsPattern);
+    const instructionsRegex = /Instructions:\s*\n([\s\S]*?)(?=\n\s*Nutritional Information|$)/;
+    const instructionsMatch = aiResponse.match(instructionsRegex);
     let instructions = "";
     
     if (instructionsMatch && instructionsMatch[1]) {
@@ -146,8 +149,8 @@ Calories: ~X`;
     }
     
     // Extract nutritional information
-    const nutritionPattern = /(?:\*\*Nutritional Information|\*\*Nutritional Information \(estimated\)\*\*)[\r\n\s]+([\s\S]*?)(?=\s*\*\*|\s*---|\s*$)/i;
-    const nutritionMatch = aiResponse.match(nutritionPattern);
+    const nutritionRegex = /Nutritional Information[^:]*:\s*\n([\s\S]*?)(?=$)/;
+    const nutritionMatch = aiResponse.match(nutritionRegex);
     
     let protein = 0;
     let carbs = 0;
@@ -176,7 +179,7 @@ Calories: ~X`;
     
     // Create recipe object
     const recipe = {
-      recipeName: dishName,
+      recipeName: recipeName,
       ingredients: ingredientList,
       instructions: instructions,
       protein: protein,
