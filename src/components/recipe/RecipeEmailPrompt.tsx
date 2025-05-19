@@ -24,9 +24,7 @@ const RecipeEmailPrompt = ({ recipe, onSendEmail, emailLoading, emailSent }: Rec
       return;
     }
     
-    if (email) {
-      onSendEmail(email);
-    }
+    onSendEmail(email || undefined);
   };
   
   return (
@@ -39,17 +37,17 @@ const RecipeEmailPrompt = ({ recipe, onSendEmail, emailLoading, emailSent }: Rec
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email address"
+            placeholder="Enter your email address (optional)"
             className="mb-2"
-            required
           />
+          <p className="text-xs text-muted-foreground text-center">Leave blank to use your account email</p>
         </div>
       )}
       
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Button 
           onClick={handleSendClick} 
-          disabled={emailLoading || emailSent || (showEmailInput && !email)}
+          disabled={emailLoading || emailSent}
           className="bg-[#FF6F61] hover:bg-[#ff5d4d] flex-1"
         >
           {emailLoading ? (

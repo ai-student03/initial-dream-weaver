@@ -75,67 +75,245 @@ function generateEmailHtml(recipe) {
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-        h1, h2, h3 { color: #FF6F61; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .nutrition { display: flex; justify-content: space-between; background-color: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        .nutrition div { text-align: center; }
-        .nutrition span { display: block; font-weight: bold; font-size: 18px; }
-        .nutrition small { color: #777; }
-        .section { margin-bottom: 25px; }
-        .ingredients { padding-left: 20px; }
-        .ingredients li { margin-bottom: 5px; }
-        .instructions { white-space: pre-wrap; }
-        .footer { text-align: center; font-size: 14px; color: #777; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
+        /* Base styles */
+        body { 
+          font-family: 'Poppins', 'Helvetica', Arial, sans-serif; 
+          line-height: 1.6; 
+          color: #333333; 
+          margin: 0; 
+          padding: 0;
+          background-color: #ffffff;
+        }
+        
+        /* Container */
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #ffffff;
+        }
+        
+        /* Header */
+        .header {
+          text-align: center;
+          padding-bottom: 20px;
+          border-bottom: 1px solid #F2FCE2;
+          margin-bottom: 30px;
+        }
+        
+        /* Recipe title */
+        .recipe-title {
+          color: #A8D5BA;
+          font-size: 28px;
+          font-weight: 700;
+          margin-bottom: 20px;
+          text-align: center;
+        }
+        
+        /* Nutrition box */
+        .nutrition-box {
+          background-color: #F2FCE2;
+          border-radius: 12px;
+          padding: 15px;
+          margin-bottom: 25px;
+          display: flex;
+          justify-content: space-between;
+          text-align: center;
+        }
+        
+        .nutrition-item {
+          flex: 1;
+          padding: 8px;
+        }
+        
+        .nutrition-value {
+          font-size: 18px;
+          font-weight: bold;
+          color: #333333;
+          display: block;
+        }
+        
+        .nutrition-label {
+          font-size: 12px;
+          color: #6B7280;
+          display: block;
+        }
+        
+        /* Cooking time badge */
+        .cooking-time {
+          background-color: #A8D5BA;
+          color: #ffffff;
+          display: inline-block;
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: 14px;
+          margin-bottom: 20px;
+        }
+        
+        /* Section title */
+        .section-title {
+          color: #333333;
+          font-size: 18px;
+          font-weight: 600;
+          margin-top: 25px;
+          margin-bottom: 10px;
+          border-bottom: 1px solid #F1F0FB;
+          padding-bottom: 8px;
+        }
+        
+        /* Ingredients */
+        .ingredients {
+          padding-left: 20px;
+          margin-bottom: 25px;
+        }
+        
+        .ingredients li {
+          margin-bottom: 6px;
+        }
+        
+        /* Instructions */
+        .instructions {
+          counter-reset: steps;
+          padding-left: 0;
+          list-style-type: none;
+        }
+        
+        .instructions li {
+          margin-bottom: 12px;
+          padding-left: 35px;
+          position: relative;
+        }
+        
+        .instructions li::before {
+          counter-increment: steps;
+          content: counter(steps);
+          position: absolute;
+          left: 0;
+          top: 2px;
+          background-color: #A8D5BA;
+          color: #ffffff;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          text-align: center;
+          line-height: 24px;
+          font-weight: bold;
+          font-size: 14px;
+        }
+        
+        /* Footer */
+        .footer {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #F1F0FB;
+          text-align: center;
+          color: #888888;
+          font-size: 12px;
+        }
+        
+        /* Goals */
+        .goals-container {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 10px;
+          margin-bottom: 20px;
+        }
+        
+        .goal-tag {
+          background-color: #F1F0FB;
+          color: #555555;
+          padding: 4px 10px;
+          border-radius: 15px;
+          font-size: 12px;
+          display: inline-block;
+        }
+        
+        /* Image */
+        .dish-image {
+          width: 100%;
+          height: auto;
+          border-radius: 12px;
+          margin: 20px 0;
+        }
       </style>
     </head>
     <body>
-      <div class="header">
-        <h1>FiMe Recipe</h1>
-        <h2>${recipe.recipeName}</h2>
-      </div>
-      
-      <div class="nutrition">
-        <div>
-          <span>${recipe.calories}</span>
-          <small>calories</small>
+      <div class="container">
+        <div class="header">
+          <img src="https://eplrkuifwkwpzfv.lovable.cdn.app/images/fime-logo.png" alt="FiMe Logo" style="max-height: 60px; margin-bottom: 15px;">
         </div>
-        <div>
-          <span>${recipe.protein}g</span>
-          <small>protein</small>
+        
+        <h1 class="recipe-title">${recipe.recipeName}</h1>
+        
+        <div class="nutrition-box">
+          <div class="nutrition-item">
+            <span class="nutrition-value">${recipe.calories}</span>
+            <span class="nutrition-label">calories</span>
+          </div>
+          <div class="nutrition-item">
+            <span class="nutrition-value">${recipe.protein}g</span>
+            <span class="nutrition-label">protein</span>
+          </div>
+          <div class="nutrition-item">
+            <span class="nutrition-value">${recipe.carbs}g</span>
+            <span class="nutrition-label">carbs</span>
+          </div>
+          <div class="nutrition-item">
+            <span class="nutrition-value">${recipe.fat}g</span>
+            <span class="nutrition-label">fat</span>
+          </div>
         </div>
+        
         <div>
-          <span>${recipe.carbs}g</span>
-          <small>carbs</small>
+          <span class="cooking-time">Cooking time: ${recipe.cookingTime} minutes</span>
+          
+          <div class="goals-container">
+            ${recipe.goals.map(goal => `<span class="goal-tag">${goal}</span>`).join('')}
+          </div>
         </div>
-        <div>
-          <span>${recipe.fat}g</span>
-          <small>fat</small>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>Cooking Time</h3>
-        <p>${recipe.cookingTime} minutes</p>
-      </div>
-      
-      <div class="section">
-        <h3>Ingredients</h3>
+        
+        <h2 class="section-title">Ingredients</h2>
         <ul class="ingredients">
-          ${recipe.ingredients.map(ing => `<li>${ing}</li>`).join('')}
+          ${recipe.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}
         </ul>
-      </div>
-      
-      <div class="section">
-        <h3>Instructions</h3>
-        <div class="instructions">${recipe.instructions}</div>
-      </div>
-      
-      <div class="footer">
-        <p>Generated by FiMe - Your Smart Nutrition Assistant</p>
-        <p>Enjoy your delicious and healthy meal!</p>
+        
+        <h2 class="section-title">Instructions</h2>
+        <ol class="instructions">
+          ${formatInstructions(recipe.instructions)}
+        </ol>
+        
+        <div class="footer">
+          <p>Generated by FiMe – Your Smart Nutrition Assistant</p>
+          <p>Enjoy your delicious and healthy meal!</p>
+        </div>
       </div>
     </body>
     </html>
   `;
+}
+
+// Helper function to format instructions as list items
+function formatInstructions(instructions) {
+  if (!instructions) return '';
+  
+  // If instructions are already numbered (1., 2., etc.)
+  if (/^\d+\.\s/m.test(instructions)) {
+    return instructions
+      .split('\n')
+      .filter(line => line.trim() !== '')
+      .map(step => {
+        // Extract just the instruction text without the numbering
+        const cleanStep = step.replace(/^\d+\.\s*/, '').trim();
+        return cleanStep ? `<li>${cleanStep}</li>` : '';
+      })
+      .join('');
+  }
+  
+  // If not numbered, format as a list
+  return instructions
+    .split('\n')
+    .filter(line => line.trim() !== '')
+    .map(step => `<li>${step.trim()}</li>`)
+    .join('');
 }

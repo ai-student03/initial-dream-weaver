@@ -15,7 +15,15 @@ export const useRecipeEmail = () => {
       setEmailLoading(true);
       
       // Get the user's email if not provided
-      const userEmail = email || prompt("Please enter your email address:");
+      let userEmail = email;
+      if (!userEmail) {
+        const { data } = await supabase.auth.getUser();
+        if (data?.user?.email) {
+          userEmail = data.user.email;
+        } else {
+          userEmail = prompt("Please enter your email address:");
+        }
+      }
       
       if (!userEmail) {
         setEmailLoading(false);
@@ -48,7 +56,7 @@ export const useRecipeEmail = () => {
       
       toast({
         title: "Success!",
-        description: "Recipe sent to your email!",
+        description: `Recipe sent to ${userEmail}!`,
         variant: "default",
       });
       setEmailSent(true);
