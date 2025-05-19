@@ -16,7 +16,7 @@ export async function generateRecipeFromOpenAI(
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${openaiApiKey}`,
-      "OpenAI-Beta": "assistants=v1"
+      "OpenAI-Beta": "assistants=v2"  // Updated to v2
     },
     body: JSON.stringify({}),
   });
@@ -38,7 +38,7 @@ export async function generateRecipeFromOpenAI(
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${openaiApiKey}`,
-      "OpenAI-Beta": "assistants=v1"
+      "OpenAI-Beta": "assistants=v2"  // Updated to v2
     },
     body: JSON.stringify({
       role: "user",
@@ -55,15 +55,14 @@ export async function generateRecipeFromOpenAI(
   console.log("Added message to thread");
 
   // Step 3: Run the assistant on the thread
-  // Note: Replace "asst_..." with your actual assistant ID
-  const assistantId = "asst_123456"; // This should be updated to your real assistant ID
+  const assistantId = "asst_123456"; // Replace with your actual assistant ID
   
   const runResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${openaiApiKey}`,
-      "OpenAI-Beta": "assistants=v1"
+      "OpenAI-Beta": "assistants=v2"  // Updated to v2
     },
     body: JSON.stringify({
       assistant_id: assistantId
@@ -92,7 +91,7 @@ export async function generateRecipeFromOpenAI(
     const runCheckResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
       headers: {
         "Authorization": `Bearer ${openaiApiKey}`,
-        "OpenAI-Beta": "assistants=v1"
+        "OpenAI-Beta": "assistants=v2"  // Updated to v2
       },
     });
 
@@ -116,7 +115,7 @@ export async function generateRecipeFromOpenAI(
   const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
     headers: {
       "Authorization": `Bearer ${openaiApiKey}`,
-      "OpenAI-Beta": "assistants=v1"
+      "OpenAI-Beta": "assistants=v2"  // Updated to v2
     },
   });
 
