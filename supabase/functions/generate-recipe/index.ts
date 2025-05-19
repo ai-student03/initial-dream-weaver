@@ -33,50 +33,56 @@ serve(async (req) => {
       );
     }
 
-    // Construct our improved prompt
-    let prompt = `Act as a professional nutritionist and recipe creator.
+    // Construct improved prompt
+    let prompt = `Act as a professional nutritionist and recipe developer.
 
-The user has the following inputs:
-
-Ingredients: ${ingredients}  
-Goal: ${goals.join(", ")}  
-Cooking time: ${cookingTime} minutes
+The user has provided:
+- Ingredients: ${ingredients}  
+- Goal: ${goals.join(", ")}  
+- Cooking time: ${cookingTime} minutes
 
 Your task:
-- Suggest one healthy, filling recipe that fits the user's nutritional goal.
-- Use only the ingredients that logically fit together — you don't have to use all of them.
-- Be creative! If "eggs" is one of the ingredients, you can use just the yolk or white.
-- Do NOT treat the ingredients as one block — each can be used partially or reinterpreted.
+1. Suggest **one healthy and satisfying recipe** that fits the user's goal and available time.
+2. Use only ingredients that logically go well together. It is not necessary to use all the ingredients.
+3. Be creative: you may use only parts of an ingredient (e.g., egg yolk or white).
+4. Treat each ingredient individually — not as a fixed bundle.
+5. If this is a follow-up request (like "Give me another idea"), make sure the recipe is **clearly different** from the previous one (change the dish style, structure, or cooking method).
 
-Format your answer exactly like this:
+Make sure all recipe instructions are **clear, numbered, and easy to follow**.
+
+✅ Most importantly:
+- **Verify that the quantities and nutritional values you provide are reasonable and accurate.**
+- Ensure the calorie, protein, carb, and fat estimations reflect the ingredients and their amounts realistically.
+- If unsure, give rounded estimates and state that they are approximate.
 
 ---
 
-**Recipe Name**  
-[Give the name of the dish]
+📦 Format your response like this:
+
+**Recipe Name**
 
 **Ingredients**  
-[List the ingredients with quantities, e.g., 2 eggs, 1 slice whole grain bread, 1/2 tomato]
+(List each with quantities, e.g.: 2 eggs, 1 slice whole grain bread, 1 tbsp tahini)
 
 **Preparation Instructions**  
-1. [Step-by-step instructions written clearly]  
-2. [Each step should be a full sentence]  
-3. [Make sure they're easy to follow and cover the whole process]
+1. Step one...  
+2. Step two...  
+3. Etc.
 
-**Nutritional Information**  
-Protein: ~Xg  
-Carbs: ~Xg  
-Fat: ~Xg  
+**Nutritional Information (estimated)**  
+Protein: ~X g  
+Carbs: ~X g  
+Fat: ~X g  
 Calories: ~X`;
 
-    // If this is a regeneration request, add the instruction for a different idea
+    // Add differentIdea flag instruction if this is a regeneration request
     if (differentIdea) {
-      prompt += "\n\nGive a different idea than before.";
+      prompt += "\n\nPlease provide a completely different recipe than before. Change the dish style, structure, or cooking method.";
     }
 
     console.log("Calling OpenAI with prompt:", prompt.substring(0, 100) + "...");
 
-    // Make direct fetch request to OpenAI API instead of using the client library
+    // Make direct fetch request to OpenAI API
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -88,7 +94,7 @@ Calories: ~X`;
         messages: [
           {
             role: "system",
-            content: "You are a professional nutritionist who specializes in creating healthy recipes."
+            content: "You are a professional nutritionist who specializes in creating healthy recipes with accurate nutritional information."
           },
           {
             role: "user",
@@ -113,18 +119,17 @@ Calories: ~X`;
     const aiResponse = data.choices[0].message?.content || "";
     console.log("AI Response:", aiResponse);
     
-    // Fix the regex patterns by properly escaping special characters
-    const dishNamePattern = /(?:Recipe Name|\*\*Recipe Name\*\*)\s*[\r\n]+\s*([^\r\n]+)/i;
+    // Fixed regex patterns with proper escaping of special characters
+    const dishNamePattern = /(?:\*\*Recipe Name\*\*|\*\*Recipe Name)[\r\n\s]*([^\r\n]+)/i;
     const dishNameMatch = aiResponse.match(dishNamePattern);
     const dishName = dishNameMatch ? dishNameMatch[1].replace(/:/g, "").trim() : "Healthy Recipe";
     
     // Extract ingredients
-    const ingredientsPattern = /(?:Ingredients|\*\*Ingredients\*\*)\s*[\r\n]+([\s\S]*?)(?=\s*(?:Preparation|Instructions|\*\*Preparation|\*\*Instructions))/i;
+    const ingredientsPattern = /(?:\*\*Ingredients\*\*|\*\*Ingredients)[\r\n\s]+([\s\S]*?)(?=\s*\*\*|\s*---|\s*$)/i;
     const ingredientsMatch = aiResponse.match(ingredientsPattern);
     let ingredientList: string[] = [];
     
     if (ingredientsMatch && ingredientsMatch[1]) {
-      // Extract items that look like ingredients (usually with a dash or asterisk)
       const ingredientsText = ingredientsMatch[1].trim();
       ingredientList = ingredientsText.split("\n")
         .map(line => line.replace(/^[*\-•]\s*/, "").trim())
@@ -132,7 +137,7 @@ Calories: ~X`;
     }
     
     // Extract instructions
-    const instructionsPattern = /(?:Preparation Instructions|Instructions|\*\*Preparation Instructions\*\*|\*\*Instructions\*\*)\s*[\r\n]+([\s\S]*?)(?=\s*(?:Nutritional|\*\*Nutritional|$))/i;
+    const instructionsPattern = /(?:\*\*Preparation Instructions\*\*|\*\*Instructions|\*\*Preparation)[\r\n\s]+([\s\S]*?)(?=\s*\*\*|\s*---|\s*$)/i;
     const instructionsMatch = aiResponse.match(instructionsPattern);
     let instructions = "";
     
@@ -141,7 +146,7 @@ Calories: ~X`;
     }
     
     // Extract nutritional information
-    const nutritionPattern = /(?:Nutritional Information|\*\*Nutritional Information\*\*)\s*[\r\n]+([\s\S]*?)$/i;
+    const nutritionPattern = /(?:\*\*Nutritional Information|\*\*Nutritional Information \(estimated\)\*\*)[\r\n\s]+([\s\S]*?)(?=\s*\*\*|\s*---|\s*$)/i;
     const nutritionMatch = aiResponse.match(nutritionPattern);
     
     let protein = 0;
@@ -153,19 +158,19 @@ Calories: ~X`;
       const nutritionText = nutritionMatch[1].trim();
       
       // Extract protein
-      const proteinMatch = nutritionText.match(/Protein:?\s*~?(\d+)(?:\.\d+)?(?:\s*)?g/i);
+      const proteinMatch = nutritionText.match(/Protein:?\s*~?(\d+(?:\.\d+)?)(?:\s*)?g/i);
       if (proteinMatch) protein = parseFloat(proteinMatch[1]);
       
       // Extract carbs
-      const carbsMatch = nutritionText.match(/Carbs:?\s*~?(\d+)(?:\.\d+)?(?:\s*)?g/i);
+      const carbsMatch = nutritionText.match(/Carbs:?\s*~?(\d+(?:\.\d+)?)(?:\s*)?g/i);
       if (carbsMatch) carbs = parseFloat(carbsMatch[1]);
       
       // Extract fat
-      const fatMatch = nutritionText.match(/Fat:?\s*~?(\d+)(?:\.\d+)?(?:\s*)?g/i);
+      const fatMatch = nutritionText.match(/Fat:?\s*~?(\d+(?:\.\d+)?)(?:\s*)?g/i);
       if (fatMatch) fat = parseFloat(fatMatch[1]);
       
       // Extract calories
-      const caloriesMatch = nutritionText.match(/Calories:?\s*~?(\d+)(?:\.\d+)?/i);
+      const caloriesMatch = nutritionText.match(/Calories:?\s*~?(\d+(?:\.\d+)?)/i);
       if (caloriesMatch) calories = parseFloat(caloriesMatch[1]);
     }
     

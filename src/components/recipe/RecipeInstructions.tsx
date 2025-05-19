@@ -12,9 +12,11 @@ const RecipeInstructions = ({ instructions }: RecipeInstructionsProps) => {
     
     // If instructions already contain numbered steps (1., 2., etc.)
     if (/^\d+\.\s/m.test(instructions)) {
-      return instructions.split('\n').map((step, index) => (
-        <p key={index} className="py-1">{step.trim()}</p>
-      ));
+      return instructions.split('\n')
+        .filter(line => line.trim() !== '')
+        .map((step, index) => (
+          <p key={index} className="py-1">{step.trim()}</p>
+        ));
     }
     
     // If not, format as a numbered list
