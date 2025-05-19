@@ -1,6 +1,6 @@
 
 /**
- * OpenAI client for recipe generation using Assistants API
+ * OpenAI client for recipe generation using Assistants API v2
  */
 
 export async function generateRecipeFromOpenAI(
@@ -20,7 +20,7 @@ export async function generateRecipeFromOpenAI(
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${openaiApiKey}`,
-        "OpenAI-Beta": "assistants=v1"
+        "OpenAI-Beta": "assistants=v2" // Updated to v2
       },
       body: JSON.stringify({}),
     });
@@ -40,7 +40,7 @@ export async function generateRecipeFromOpenAI(
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${openaiApiKey}`,
-        "OpenAI-Beta": "assistants=v1"
+        "OpenAI-Beta": "assistants=v2" // Updated to v2
       },
       body: JSON.stringify({
         role: "user",
@@ -61,7 +61,7 @@ export async function generateRecipeFromOpenAI(
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${openaiApiKey}`,
-        "OpenAI-Beta": "assistants=v1"
+        "OpenAI-Beta": "assistants=v2" // Updated to v2
       },
       body: JSON.stringify({
         assistant_id: assistantId
@@ -95,7 +95,7 @@ export async function generateRecipeFromOpenAI(
       method: "GET",
       headers: {
         "Authorization": `Bearer ${openaiApiKey}`,
-        "OpenAI-Beta": "assistants=v1"
+        "OpenAI-Beta": "assistants=v2" // Updated to v2
       },
     });
 
@@ -113,16 +113,21 @@ export async function generateRecipeFromOpenAI(
       throw new Error("No assistant messages found");
     }
 
-    // Extract the content from the latest message
+    // Extract the content from the latest message (v2 format)
     const latestMessage = assistantMessages[0];
-    const textContent = latestMessage.content.find(c => c.type === "text");
     
-    if (!textContent) {
+    // In v2, content is an array of objects with different types
+    const textContents = latestMessage.content
+      .filter(c => c.type === "text")
+      .map(c => c.text.value)
+      .join("\n");
+    
+    if (!textContents) {
       throw new Error("No text content found in assistant message");
     }
 
     console.log("Recipe generated successfully");
-    return textContent.text.value;
+    return textContents;
     
   } catch (error) {
     console.error("OpenAI Assistant API error:", error);
@@ -136,7 +141,7 @@ async function checkRunStatus(threadId: string, runId: string, apiKey: string): 
     method: "GET",
     headers: {
       "Authorization": `Bearer ${apiKey}`,
-      "OpenAI-Beta": "assistants=v1"
+      "OpenAI-Beta": "assistants=v2" // Updated to v2
     },
   });
 
