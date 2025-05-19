@@ -13,6 +13,7 @@ import RecipeEmailPrompt from '@/components/recipe/RecipeEmailPrompt';
 import RecipeLoadingState from '@/components/recipe/RecipeLoadingState';
 import { useRecipeGeneration } from '@/hooks/useRecipeGeneration';
 import { useRecipeEmail } from '@/hooks/useRecipeEmail';
+import { useSaveRecipe } from '@/hooks/useSaveRecipe';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const RecipePreview = () => {
@@ -21,6 +22,7 @@ const RecipePreview = () => {
   const formData = location.state?.formData as RecipeFormData;
   const { recipe, loading, error, handleSaveRecipe, handleRegenerateRecipe } = useRecipeGeneration(formData);
   const { emailLoading, emailSent, sendRecipeEmail } = useRecipeEmail();
+  const { isSaving, isSaved, saveRecipe } = useSaveRecipe();
 
   if (loading) {
     return <RecipeLoadingState />;
@@ -123,8 +125,11 @@ const RecipePreview = () => {
           <RecipeEmailPrompt 
             recipe={recipe}
             onSendEmail={() => sendRecipeEmail(recipe)} 
+            onSaveRecipe={() => saveRecipe(recipe)}
             emailLoading={emailLoading} 
-            emailSent={emailSent} 
+            emailSent={emailSent}
+            saveLoading={isSaving}
+            savedRecipe={isSaved}
           />
         </CardContent>
         

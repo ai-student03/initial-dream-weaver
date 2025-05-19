@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Loader, Mail } from 'lucide-react';
+import { Check, Heart, Loader, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Recipe } from '@/lib/types';
 import { Input } from '@/components/ui/input';
@@ -9,11 +9,22 @@ import { Input } from '@/components/ui/input';
 interface RecipeEmailPromptProps {
   recipe: Recipe;
   onSendEmail: (email?: string) => Promise<void>;
+  onSaveRecipe?: () => Promise<void>;
   emailLoading: boolean;
   emailSent: boolean;
+  saveLoading?: boolean;
+  savedRecipe?: boolean;
 }
 
-const RecipeEmailPrompt = ({ recipe, onSendEmail, emailLoading, emailSent }: RecipeEmailPromptProps) => {
+const RecipeEmailPrompt = ({ 
+  recipe, 
+  onSendEmail, 
+  onSaveRecipe,
+  emailLoading, 
+  emailSent,
+  saveLoading,
+  savedRecipe
+}: RecipeEmailPromptProps) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [showEmailInput, setShowEmailInput] = useState(false);
@@ -45,6 +56,29 @@ const RecipeEmailPrompt = ({ recipe, onSendEmail, emailLoading, emailSent }: Rec
       )}
       
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        {onSaveRecipe && (
+          <Button 
+            onClick={onSaveRecipe} 
+            disabled={saveLoading || savedRecipe}
+            variant="outline"
+            className="border-fime-green hover:bg-fime-green/10 flex-1"
+          >
+            {saveLoading ? (
+              <>
+                <Loader className="mr-2 h-4 w-4 animate-spin" /> Saving...
+              </>
+            ) : savedRecipe ? (
+              <>
+                <Check className="mr-2 h-4 w-4" /> Saved!
+              </>
+            ) : (
+              <>
+                <Heart className="mr-2 h-4 w-4" /> 💚 Save to My Recipes
+              </>
+            )}
+          </Button>
+        )}
+        
         <Button 
           onClick={handleSendClick} 
           disabled={emailLoading || emailSent}
@@ -68,6 +102,7 @@ const RecipeEmailPrompt = ({ recipe, onSendEmail, emailLoading, emailSent }: Rec
             </>
           )}
         </Button>
+        
         <Button 
           variant="outline" 
           onClick={() => navigate('/nutrition')}
